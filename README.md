@@ -1,2 +1,21 @@
-# perfectwisdom-school-new
-A modern school management platform for Perfect Wisdom School, providing Admin, Staff, Parent, and Corporate/Cooperative portals with real-time management backed by a secure API and PostgreSQL database.
+# Perfect Wisdom School
+
+A complete school management platform built by Perfect Wisdom.
+
+## Applications
+
+- Web administration portal
+- Android mobile application
+- Backend API
+- PostgreSQL database
+
+## Deployment
+
+- GitHub — source control
+- Render — backend/API deployment
+- Google Play — Android application distribution
+
+## Branding
+
+Perfect Wisdom School
+Blue + Orange

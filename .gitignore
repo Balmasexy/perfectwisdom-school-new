@@ -1,0 +1,13 @@
+node_modules/
+.next/
+.expo/
+dist/
+build/
+.env
+.env.local
+.env.*.local
+*.log
+*.jks
+*.keystore
+google-services.json
+.DS_Store

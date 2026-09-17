@@ -1,0 +1,10 @@
+{
+  "name": "perfectwisdom-school",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Perfect Wisdom School management platform",
+  "scripts": {
+    "dev": "echo \"Use the application-specific development command\"",
+    "build": "echo \"Use the application-specific build command\""
+  }
+}
