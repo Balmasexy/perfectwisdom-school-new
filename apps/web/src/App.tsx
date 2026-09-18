@@ -1522,6 +1522,10 @@ function Dashboard({
         </header>
 
         <section className="dashboard-content">
+          {apiError && (
+            <div className="management-error">{apiError}</div>
+          )}
+
           {role === 'Admin' && activeSection === 'Staff' ? (
             <StaffManagement />
           ) : role === 'Admin' && activeSection === 'Branches' ? (
