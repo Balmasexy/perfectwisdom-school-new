@@ -552,13 +552,7 @@ function BranchManagement() {
       setLoading(true)
       setError('')
 
-      const response = await apiRequest('/branches')
-
-      if (!response.ok) {
-        throw new Error(`Unable to load branches: ${response.status}`)
-      }
-
-      const data = await response.json()
+      const data = await apiRequest<typeof branches>('/branches')
       setBranches(data)
     } catch (err) {
       setError(
@@ -592,7 +586,7 @@ function BranchManagement() {
       setSaving(true)
       setError('')
 
-      const response = await apiRequest('/branches',
+      await apiRequest('/branches',
         {
           method: 'POST',
           headers: {
@@ -607,13 +601,15 @@ function BranchManagement() {
         }
       )
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(
-          data.error || `Unable to create branch: ${response.status}`
-        )
-      }
+      await apiRequest('/branches', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: form.name,
+          code: form.code,
+          address: form.address || undefined,
+          phoneNumber: form.phoneNumber || undefined,
+        }),
+      })
 
       setForm({
         name: '',
@@ -865,13 +861,7 @@ function StaffManagement() {
 
   async function loadBranches() {
     try {
-      const response = await apiRequest('/branches')
-
-      if (!response.ok) {
-        throw new Error(`Unable to load branches: ${response.status}`)
-      }
-
-      const data = await response.json()
+      const data = await apiRequest<typeof branches>('/branches')
       setBranches(data)
     } catch (err) {
       setError(
@@ -885,13 +875,7 @@ function StaffManagement() {
       setLoading(true)
       setError('')
 
-      const response = await apiRequest('/staff')
-
-      if (!response.ok) {
-        throw new Error(`Unable to load staff: ${response.status}`)
-      }
-
-      const data = await response.json()
+      const data = await apiRequest<typeof staff>('/staff')
       setStaff(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load staff')
@@ -919,7 +903,7 @@ function StaffManagement() {
       setSaving(true)
       setError('')
 
-      const response = await apiRequest('/staff', {
+      await apiRequest('/staff', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -945,13 +929,19 @@ function StaffManagement() {
         }),
       })
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(
-          data.error || `Unable to create staff: ${response.status}`
-        )
-      }
+      await apiRequest('/staff', {
+        method: 'POST',
+        body: JSON.stringify({
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          phoneNumber: form.phoneNumber || undefined,
+          branchId: form.branchId || undefined,
+          department: form.department || undefined,
+          bankName: form.bankName || undefined,
+          bankAccountNumber: form.bankAccountNumber || undefined,
+        }),
+      })
 
       setForm({
         firstName: '',
@@ -1326,13 +1316,17 @@ function Dashboard({
         setLoading(true)
         setApiError('')
 
-        const response = await apiRequest('/dashboard/summary')
-
-        if (!response.ok) {
-          throw new Error(`API request failed: ${response.status}`)
-        }
-
-        const data = await response.json()
+        const data = await apiRequest<{
+          students: number
+          staff: number
+          branches: number
+          classes: number
+          assignments: number
+          messages: number
+          results: number
+          bankAccounts: number
+          transactions: number
+        }>('/dashboard/summary')
 
         if (!cancelled) {
           setSummary(data)
