@@ -25,6 +25,7 @@ import {
   X,
 } from 'lucide-react'
 import './App.css'
+import { apiRequest, setAuthToken } from './api'
 
 type Page = 'landing' | 'login' | 'dashboard'
 type Role = 'Admin' | 'Staff' | 'Parent'
@@ -377,6 +378,29 @@ function Login({
   onDashboard: () => void
 }) {
   const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+
+  async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setSubmitting(true)
+    setError('')
+    try {
+      const data = await apiRequest<{ token: string; user: { role: string } }>('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password, role: role.toUpperCase() }),
+      })
+      setAuthToken(data.token)
+      saveRole(data.user.role === 'STAFF' ? 'Staff' : data.user.role === 'PARENT' ? 'Parent' : 'Admin')
+      onDashboard()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to sign in')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <div className="login-page">
@@ -430,13 +454,12 @@ function Login({
             </p>
           </div>
 
-          <form onSubmit={(event) => {
-            event.preventDefault()
-            onDashboard()
-          }}>
+          {error && <div className="management-error">{error}</div>}
+
+          <form onSubmit={handleLogin}>
             <label>
               Email address
-              <input type="email" placeholder="you@example.com" required />
+              <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" autoComplete="email" required />
             </label>
 
             <label>
@@ -444,7 +467,10 @@ function Login({
               <div className="password-field">
                 <input
                   type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
                   placeholder="Enter your password"
+                  autoComplete="current-password"
                   required
                 />
                 <button
@@ -465,9 +491,9 @@ function Login({
               <button type="button" className="forgot">Forgot password?</button>
             </div>
 
-            <button className="login-button" type="submit">
-              Sign in as {role}
-              <ArrowRight size={18} />
+            <button className="login-button" type="submit" disabled={submitting}>
+              {submitting ? 'Signing in…' : `Sign in as ${role}`}
+              {!submitting && <ArrowRight size={18} />}
             </button>
           </form>
 
@@ -526,7 +552,7 @@ function BranchManagement() {
       setLoading(true)
       setError('')
 
-      const response = await fetch('http://127.0.0.1:3001/branches')
+      const response = await apiRequest('/branches')
 
       if (!response.ok) {
         throw new Error(`Unable to load branches: ${response.status}`)
@@ -566,8 +592,7 @@ function BranchManagement() {
       setSaving(true)
       setError('')
 
-      const response = await fetch(
-        'http://127.0.0.1:3001/branches',
+      const response = await apiRequest('/branches',
         {
           method: 'POST',
           headers: {
@@ -840,7 +865,7 @@ function StaffManagement() {
 
   async function loadBranches() {
     try {
-      const response = await fetch('http://127.0.0.1:3001/branches')
+      const response = await apiRequest('/branches')
 
       if (!response.ok) {
         throw new Error(`Unable to load branches: ${response.status}`)
@@ -860,7 +885,7 @@ function StaffManagement() {
       setLoading(true)
       setError('')
 
-      const response = await fetch('http://127.0.0.1:3001/staff')
+      const response = await apiRequest('/staff')
 
       if (!response.ok) {
         throw new Error(`Unable to load staff: ${response.status}`)
@@ -894,7 +919,7 @@ function StaffManagement() {
       setSaving(true)
       setError('')
 
-      const response = await fetch('http://127.0.0.1:3001/staff', {
+      const response = await apiRequest('/staff', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1301,7 +1326,7 @@ function Dashboard({
         setLoading(true)
         setApiError('')
 
-        const response = await fetch('http://127.0.0.1:3001/dashboard/summary')
+        const response = await apiRequest('/dashboard/summary')
 
         if (!response.ok) {
           throw new Error(`API request failed: ${response.status}`)

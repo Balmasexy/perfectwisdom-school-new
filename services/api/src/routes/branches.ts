@@ -2,13 +2,14 @@ import type { FastifyInstance } from 'fastify'
 import { eq } from 'drizzle-orm'
 import { db } from '../db/client.js'
 import { branches } from '../db/schema.js'
+import { requireRoles } from './auth.js'
 
 export async function branchRoutes(app: FastifyInstance) {
-  app.get('/branches', async () => {
+  app.get('/branches', { preHandler: requireRoles('ADMIN') }, async () => {
     return db.select().from(branches)
   })
 
-  app.get('/branches/:id', async (request, reply) => {
+  app.get('/branches/:id', { preHandler: requireRoles('ADMIN') }, async (request, reply) => {
     const { id } = request.params as { id: string }
 
     const [branch] = await db
@@ -25,7 +26,7 @@ export async function branchRoutes(app: FastifyInstance) {
     return branch
   })
 
-  app.post('/branches', async (request, reply) => {
+  app.post('/branches', { preHandler: requireRoles('ADMIN') }, async (request, reply) => {
     const body = request.body as {
       name?: string
       code?: string

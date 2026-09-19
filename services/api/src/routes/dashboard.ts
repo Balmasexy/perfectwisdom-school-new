@@ -1,9 +1,10 @@
 import type { FastifyInstance } from 'fastify'
 import { sql } from 'drizzle-orm'
 import { db } from '../db/client.js'
+import { requireAuth } from './auth.js'
 
 export async function dashboardRoutes(app: FastifyInstance) {
-  app.get('/dashboard/summary', async () => {
+  app.get('/dashboard/summary', { preHandler: requireAuth }, async () => {
     const result = await db.execute(sql`
       SELECT
         (SELECT COUNT(*) FROM students) AS students,

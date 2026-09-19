@@ -2,9 +2,10 @@ import type { FastifyInstance } from 'fastify'
 import { eq } from 'drizzle-orm'
 import { db } from '../db/client.js'
 import { staff } from '../db/schema.js'
+import { requireRoles } from './auth.js'
 
 export async function staffRoutes(app: FastifyInstance) {
-  app.delete('/staff/:id', async (request, reply) => {
+  app.delete('/staff/:id', { preHandler: requireRoles('ADMIN') }, async (request, reply) => {
     const { id } = request.params as { id: string }
 
     const deleted = await db
@@ -19,11 +20,11 @@ export async function staffRoutes(app: FastifyInstance) {
     return { success: true, deleted: deleted[0] }
   })
 
-  app.get('/staff', async () => {
+  app.get('/staff', { preHandler: requireRoles('ADMIN') }, async () => {
     return db.select().from(staff)
   })
 
-  app.post('/staff', async (request, reply) => {
+  app.post('/staff', { preHandler: requireRoles('ADMIN') }, async (request, reply) => {
     const body = request.body as {
       firstName?: string
       lastName?: string
@@ -79,7 +80,7 @@ export async function staffRoutes(app: FastifyInstance) {
     return reply.code(201).send(created)
   })
 
-  app.get('/staff/:id', async (request, reply) => {
+  app.get('/staff/:id', { preHandler: requireRoles('ADMIN') }, async (request, reply) => {
     const { id } = request.params as { id: string }
 
     const [record] = await db

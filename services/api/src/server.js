@@ -2,6 +2,10 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import dotenv from 'dotenv';
+import { dashboardRoutes } from './routes/dashboard.js';
+import { staffRoutes } from './routes/staff.js';
+import { branchRoutes } from './routes/branches.js';
+import { authRoutes } from './routes/auth.js';
 dotenv.config();
 const app = Fastify({
     logger: true,
@@ -13,6 +17,10 @@ await app.register(cors, {
 await app.register(jwt, {
     secret: process.env.JWT_SECRET || 'change-this-secret-before-production',
 });
+await app.register(dashboardRoutes);
+await app.register(staffRoutes);
+await app.register(branchRoutes);
+await app.register(authRoutes);
 app.get('/health', async () => {
     return {
         status: 'ok',
