@@ -6,6 +6,7 @@ import { dashboardRoutes } from './routes/dashboard.js'
 import { staffRoutes } from './routes/staff.js'
 import { branchRoutes } from './routes/branches.js'
 import { authRoutes } from './routes/auth.js'
+import { paymentRoutes } from './routes/payments.js'
 
 dotenv.config()
 
@@ -26,6 +27,7 @@ await app.register(dashboardRoutes)
 await app.register(staffRoutes)
 await app.register(branchRoutes)
 await app.register(authRoutes)
+await app.register(paymentRoutes)
 
 app.get('/health', async () => {
   return {

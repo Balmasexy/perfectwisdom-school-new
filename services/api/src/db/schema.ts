@@ -376,3 +376,53 @@ export const cooperativeStaff = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
 )
+
+export const googleIdentities = pgTable(
+  'google_identities',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+    googleSub: varchar('google_sub', { length: 255 }).notNull(),
+    email: varchar('email', { length: 255 }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('google_identities_sub_unique').on(table.googleSub),
+    uniqueIndex('google_identities_user_unique').on(table.userId),
+  ],
+)
+
+export const passkeys = pgTable(
+  'passkeys',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+    credentialId: text('credential_id').notNull(),
+    publicKey: text('public_key').notNull(),
+    counter: integer('counter').default(0).notNull(),
+    transports: text('transports'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('passkeys_credential_id_unique').on(table.credentialId),
+    index('passkeys_user_id_index').on(table.userId),
+  ],
+)
+
+export const authChallenges = pgTable(
+  'auth_challenges',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    challenge: text('challenge').notNull(),
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
+    challengeType: varchar('challenge_type', { length: 30 }).notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('auth_challenges_challenge_index').on(table.challenge),
+    index('auth_challenges_expires_index').on(table.expiresAt),
+  ],
+)

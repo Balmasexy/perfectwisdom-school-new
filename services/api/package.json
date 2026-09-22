@@ -31,10 +31,12 @@
   "dependencies": {
     "@fastify/cors": "^11.3.0",
     "@fastify/jwt": "^10.2.2",
+    "@simplewebauthn/server": "^13.3.3",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "fastify": "^5.12.5",
+    "google-auth-library": "^10.9.1",
     "pg": "^8.23.0",
     "zod": "^4.6.5"
   }

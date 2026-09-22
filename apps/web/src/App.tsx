@@ -4,6 +4,7 @@ import {
   BookOpen,
   BarChart3,
   CalendarDays,
+  CreditCard,
   CheckCircle2,
   ChevronRight,
   ChevronDown,
@@ -26,6 +27,7 @@ import {
 } from 'lucide-react'
 import './App.css'
 import { apiRequest, setAuthToken } from './api'
+import Payments from './Payments'
 
 type Page = 'landing' | 'login' | 'dashboard'
 type Role = 'Admin' | 'Staff' | 'Parent'
@@ -1362,7 +1364,7 @@ function Dashboard({
         ['Branches', loading ? '—' : String(summary.branches)],
         ['Attendance', '0%'],
       ],
-      nav: ['Dashboard', 'Students', 'Staff', 'Branches', 'Attendance', 'Classes', 'Reports', 'Settings'],
+      nav: ['Dashboard', 'Students', 'Staff', 'Branches', 'Attendance', 'Classes', 'Reports', 'Settings', 'Payments'],
       panels: [
         {
           title: 'School Administration',
@@ -1393,7 +1395,7 @@ function Dashboard({
         ['Attendance', '0%'],
         ['Tasks Today', loading ? '—' : '0'],
       ],
-      nav: ['Dashboard', 'My Students', 'Classes', 'Attendance', 'Assignments', 'Messages', 'Profile'],
+      nav: ['Dashboard', 'My Students', 'Classes', 'Attendance', 'Assignments', 'Messages', 'Profile', 'Payments'],
       panels: [
         {
           title: 'Today at School',
@@ -1424,7 +1426,7 @@ function Dashboard({
         ['Assignments', loading ? '—' : String(summary.assignments)],
         ['School Updates', loading ? '—' : '0'],
       ],
-      nav: ['Dashboard', 'My Children', 'Attendance', 'Results', 'Assignments', 'Messages', 'Profile'],
+      nav: ['Dashboard', 'My Children', 'Attendance', 'Results', 'Assignments', 'Messages', 'Profile', 'Payments'],
       panels: [
         {
           title: 'My Children',
@@ -1479,6 +1481,7 @@ function Dashboard({
               Classes: BookOpen,
               Reports: BarChart3,
               Settings: Settings,
+              Payments: CreditCard,
               'My Students': Users,
               Assignments: ClipboardCheck,
               Messages: MessageSquare,
@@ -1545,7 +1548,9 @@ function Dashboard({
             <div className="management-error">{apiError}</div>
           )}
 
-          {role === 'Admin' && activeSection === 'Staff' ? (
+          {activeSection === 'Payments' ? (
+            <Payments />
+          ) : role === 'Admin' && activeSection === 'Staff' ? (
             <StaffManagement />
           ) : role === 'Admin' && activeSection === 'Branches' ? (
             <BranchManagement />
