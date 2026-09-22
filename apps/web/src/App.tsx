@@ -25,7 +25,7 @@ import {
   UserRoundCheck,
   X,
 } from 'lucide-react'
-import { browserSupportsWebAuthn, startAuthentication } from '@simplewebauthn/browser'
+import { browserSupportsWebAuthn, startAuthentication, startRegistration } from '@simplewebauthn/browser'
 import './App.css'
 import { apiRequest, setAuthToken } from './api'
 import Payments from './Payments'
@@ -1485,6 +1485,122 @@ function StaffManagement() {
   )
 }
 
+
+function DeviceSecurity() {
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+
+  async function registerDevice() {
+    setLoading(true)
+    setMessage('')
+    setError('')
+
+    try {
+      if (!browserSupportsWebAuthn()) {
+        throw new Error(
+          'This browser or device does not support secure device authentication.'
+        )
+      }
+
+      const options = await apiRequest<any>(
+        '/auth/passkey/register/options',
+        {
+          method: 'POST',
+          body: JSON.stringify({}),
+        },
+      )
+
+      const registrationResponse = await startRegistration({
+        optionsJSON: options,
+      })
+
+      await apiRequest(
+        '/auth/passkey/register/verify',
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            response: registrationResponse,
+            challenge: options.challenge,
+          }),
+        },
+      )
+
+      setMessage(
+        'Device authentication has been enabled successfully. You can now use Fingerprint / Face from the login screen.',
+      )
+    } catch (err) {
+      const text =
+        err instanceof Error
+          ? err.message
+          : 'Unable to register this device.'
+
+      if (
+        text.toLowerCase().includes('cancel') ||
+        text.toLowerCase().includes('abort')
+      ) {
+        setError('Device registration was cancelled.')
+      } else {
+        setError(text)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="security-management">
+      <div className="dashboard-welcome">
+        <span className="section-kicker">ACCOUNT SECURITY</span>
+        <h1>Device Security</h1>
+        <p>
+          Register this device for secure fingerprint, Face Unlock, PIN or
+          another supported device authentication method.
+        </p>
+      </div>
+
+      <div className="security-management-card">
+        <div className="security-management-icon">
+          <ShieldCheck size={32} />
+        </div>
+
+        <div className="security-management-content">
+          <h2>Fingerprint / Face Unlock</h2>
+          <p>
+            Your biometric information stays on your device. Perfect Wisdom
+            School receives only a secure cryptographic credential.
+          </p>
+
+          {message && (
+            <div className="security-success">
+              <CheckCircle2 size={18} />
+              <span>{message}</span>
+            </div>
+          )}
+
+          {error && (
+            <div className="management-error">
+              {error}
+            </div>
+          )}
+
+          <button
+            type="button"
+            className="login-button device-security-button"
+            onClick={() => void registerDevice()}
+            disabled={loading}
+          >
+            <ShieldCheck size={19} />
+            {loading
+              ? 'Waiting for device authentication…'
+              : 'Enable Fingerprint / Face'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function Dashboard({
   role,
   onSignOut,
@@ -1562,7 +1678,7 @@ function Dashboard({
         ['Branches', loading ? '—' : String(summary.branches)],
         ['Attendance', '0%'],
       ],
-      nav: ['Dashboard', 'Students', 'Staff', 'Branches', 'Attendance', 'Classes', 'Reports', 'Settings', 'Payments'],
+      nav: ['Dashboard', 'Students', 'Staff', 'Branches', 'Attendance', 'Classes', 'Reports', 'Settings', 'Device Security', 'Payments'],
       panels: [
         {
           title: 'School Administration',
@@ -1593,7 +1709,7 @@ function Dashboard({
         ['Attendance', '0%'],
         ['Tasks Today', loading ? '—' : '0'],
       ],
-      nav: ['Dashboard', 'My Students', 'Classes', 'Attendance', 'Assignments', 'Messages', 'Profile', 'Payments'],
+      nav: ['Dashboard', 'My Students', 'Classes', 'Attendance', 'Assignments', 'Messages', 'Profile', 'Device Security', 'Payments'],
       panels: [
         {
           title: 'Today at School',
@@ -1624,7 +1740,7 @@ function Dashboard({
         ['Assignments', loading ? '—' : String(summary.assignments)],
         ['School Updates', loading ? '—' : '0'],
       ],
-      nav: ['Dashboard', 'My Children', 'Attendance', 'Results', 'Assignments', 'Messages', 'Profile', 'Payments'],
+      nav: ['Dashboard', 'My Children', 'Attendance', 'Results', 'Assignments', 'Messages', 'Profile', 'Device Security', 'Payments'],
       panels: [
         {
           title: 'My Children',
@@ -1680,6 +1796,7 @@ function Dashboard({
               Reports: BarChart3,
               Settings: Settings,
               Payments: CreditCard,
+              'Device Security': ShieldCheck,
               'My Students': Users,
               Assignments: ClipboardCheck,
               Messages: MessageSquare,
@@ -1746,7 +1863,9 @@ function Dashboard({
             <div className="management-error">{apiError}</div>
           )}
 
-          {activeSection === 'Payments' ? (
+          {activeSection === 'Device Security' ? (
+            <DeviceSecurity />
+          ) : activeSection === 'Payments' ? (
             <Payments />
           ) : role === 'Admin' && activeSection === 'Staff' ? (
             <StaffManagement />
