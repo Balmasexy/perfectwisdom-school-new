@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   ArrowRight,
   BookOpen,
@@ -25,6 +25,7 @@ import {
   UserRoundCheck,
   X,
 } from 'lucide-react'
+import { browserSupportsWebAuthn, startAuthentication } from '@simplewebauthn/browser'
 import './App.css'
 import { apiRequest, setAuthToken } from './api'
 import Payments from './Payments'
@@ -383,26 +384,201 @@ function Login({
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
+  const [biometricLoading, setBiometricLoading] = useState(false)
   const [error, setError] = useState('')
+  const googleButtonRef = useRef<HTMLDivElement>(null)
+
+  function goToDashboard(userRole: string) {
+    const normalizedRole =
+      userRole === 'STAFF'
+        ? 'Staff'
+        : userRole === 'PARENT'
+          ? 'Parent'
+          : 'Admin'
+
+    saveRole(normalizedRole)
+    onDashboard()
+  }
 
   async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setSubmitting(true)
     setError('')
+
     try {
-      const data = await apiRequest<{ token: string; user: { role: string } }>('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, password, role: role.toUpperCase() }),
-      })
+      const data = await apiRequest<{ token: string; user: { role: string } }>(
+        '/auth/login',
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            email,
+            password,
+            role: role.toUpperCase(),
+          }),
+        },
+      )
+
       setAuthToken(data.token)
-      saveRole(data.user.role === 'STAFF' ? 'Staff' : data.user.role === 'PARENT' ? 'Parent' : 'Admin')
-      onDashboard()
+      goToDashboard(data.user.role)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to sign in')
     } finally {
       setSubmitting(false)
     }
   }
+
+  async function handleGoogleCredential(credential: string) {
+    setGoogleLoading(true)
+    setError('')
+
+    try {
+      const data = await apiRequest<{
+        token: string
+        user: { role: string }
+      }>('/auth/google', {
+        method: 'POST',
+        body: JSON.stringify({ credential }),
+      })
+
+      setAuthToken(data.token)
+      goToDashboard(data.user.role)
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Google sign-in could not be completed',
+      )
+    } finally {
+      setGoogleLoading(false)
+    }
+  }
+
+  async function handleBiometricLogin() {
+    setBiometricLoading(true)
+    setError('')
+
+    try {
+      if (!browserSupportsWebAuthn()) {
+        throw new Error(
+          'This browser or device does not support fingerprint, Face Unlock, or passkeys.',
+        )
+      }
+
+      const options = await apiRequest<Parameters<typeof startAuthentication>[0]['optionsJSON']>(
+        '/auth/passkey/login/options',
+        {
+          method: 'POST',
+          body: JSON.stringify({}),
+        },
+      )
+
+      const response = await startAuthentication({
+        optionsJSON: options,
+      })
+
+      const data = await apiRequest<{
+        token: string
+        user: { role: string }
+      }>('/auth/passkey/login/verify', {
+        method: 'POST',
+        body: JSON.stringify({
+          response,
+          challenge: options.challenge,
+        }),
+      })
+
+      setAuthToken(data.token)
+      goToDashboard(data.user.role)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Device authentication failed'
+
+      if (
+        message.toLowerCase().includes('credential') ||
+        message.toLowerCase().includes('passkey') ||
+        message.toLowerCase().includes('not found')
+      ) {
+        setError(
+          'No device passkey is registered for this school account yet. Sign in with your password first, then enable device unlock from your account.',
+        )
+      } else if (
+        message.toLowerCase().includes('cancel') ||
+        message.toLowerCase().includes('abort')
+      ) {
+        setError('Device authentication was cancelled.')
+      } else {
+        setError(message)
+      }
+    } finally {
+      setBiometricLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function setupGoogle() {
+      try {
+        const config = await apiRequest<{ client_id: string }>(
+          '/auth/google/config',
+        )
+
+        if (!config.client_id || cancelled) return
+
+        const renderButton = () => {
+          if (cancelled || !googleButtonRef.current) return
+
+          const google = (window as any).google
+
+          if (!google?.accounts?.id) return
+
+          googleButtonRef.current.innerHTML = ''
+
+          google.accounts.id.initialize({
+            client_id: config.client_id,
+            callback: (response: { credential: string }) => {
+              void handleGoogleCredential(response.credential)
+            },
+          })
+
+          google.accounts.id.renderButton(googleButtonRef.current, {
+            theme: 'outline',
+            size: 'large',
+            width: 260,
+            text: 'signin_with',
+            shape: 'rectangular',
+          })
+        }
+
+        const existing = document.querySelector(
+          'script[data-google-identity-services]',
+        )
+
+        if (existing) {
+          renderButton()
+          return
+        }
+
+        const script = document.createElement('script')
+        script.src = 'https://accounts.google.com/gsi/client'
+        script.async = true
+        script.defer = true
+        script.dataset.googleIdentityServices = 'true'
+        script.onload = renderButton
+        document.head.appendChild(script)
+      } catch {
+        if (!cancelled) {
+          setError('Google Sign-In is currently unavailable.')
+        }
+      }
+    }
+
+    void setupGoogle()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   return (
     <div className="login-page">
@@ -461,7 +637,14 @@ function Login({
           <form onSubmit={handleLogin}>
             <label>
               Email address
-              <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" autoComplete="email" required />
+              <input
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="you@example.com"
+                autoComplete="email"
+                required
+              />
             </label>
 
             <label>
@@ -502,15 +685,30 @@ function Login({
           <div className="login-divider"><span>or continue with</span></div>
 
           <div className="social-login-grid">
-            <button className="social-button" type="button">
-              <span className="google-g">G</span>
-              Google
-            </button>
+            <div
+              ref={googleButtonRef}
+              className="google-button-host"
+              aria-label="Sign in with Google"
+            >
+              {googleLoading && <span>Connecting to Google…</span>}
+            </div>
 
-            <button className="social-button biometric-button" type="button">
+            <button
+              className="social-button biometric-button"
+              type="button"
+              onClick={() => void handleBiometricLogin()}
+              disabled={biometricLoading}
+            >
               <KeyRound size={19} />
-              Fingerprint / Face
+              {biometricLoading
+                ? 'Checking device…'
+                : 'Fingerprint / Face'}
             </button>
+          </div>
+
+          <div className="device-auth-help">
+            Use your Android fingerprint, Face Unlock, PIN or other supported
+            device authentication when a passkey has been registered.
           </div>
 
           <div className="secure-note">
