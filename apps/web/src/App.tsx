@@ -31,6 +31,7 @@ import { apiRequest, setAuthToken } from './api'
 import Payments from './Payments'
 import JambRegistration from './JambRegistration'
 import ExamRegistration from './ExamRegistration'
+import ModuleWorkspace from './ModuleWorkspace'
 
 type Page = 'landing' | 'login' | 'create-account' | 'dashboard'
 type Role = 'Admin' | 'Staff' | 'Parent'
@@ -2135,6 +2136,8 @@ function Dashboard({
             <StaffManagement />
           ) : role === 'Admin' && activeSection === 'Branches' ? (
             <BranchManagement />
+          ) : activeSection !== 'Dashboard' ? (
+            <ModuleWorkspace role={role} section={activeSection} />
           ) : ( 
             <>
               <div className="dashboard-welcome">
