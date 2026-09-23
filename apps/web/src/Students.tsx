@@ -11,6 +11,7 @@ import {
   UserX,
 } from 'lucide-react'
 import { apiRequest } from './api'
+import StudentProfile from './StudentProfile'
 
 type Student = {
   id: string
@@ -73,6 +74,7 @@ export default function Students() {
   const [error, setError] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [selected, setSelected] = useState<Student | null>(null)
+  const [profileId, setProfileId] = useState<string | null>(null)
   const [form, setForm] = useState(emptyForm)
 
   async function load() {
@@ -142,6 +144,15 @@ export default function Students() {
     } finally {
       setSaving(false)
     }
+  }
+
+  if (profileId) {
+    return (
+      <StudentProfile
+        studentId={profileId}
+        onBack={() => setProfileId(null)}
+      />
+    )
   }
 
   return (
@@ -289,7 +300,7 @@ export default function Students() {
                 {students.map((student) => (
                   <tr
                     key={student.id}
-                    onClick={() => setSelected(student)}
+                    onClick={() => setProfileId(student.id)}
                   >
                     <td>
                       <strong>{student.studentId}</strong>

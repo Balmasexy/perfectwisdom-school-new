@@ -3209,3 +3209,73 @@ button {
     font-size: 21px;
   }
 }
+
+.student-profile-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0 14px;
+  margin-bottom: 18px;
+}
+
+.student-profile-tabs button {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #dbe3ef;
+  background: #fff;
+  color: #334155;
+  border-radius: 10px;
+  padding: 10px 13px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.student-profile-tabs button:hover {
+  border-color: #f59e0b;
+  color: #b45309;
+}
+
+.student-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.profile-empty-links {
+  display: grid;
+  gap: 10px;
+}
+
+.profile-empty-links div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px;
+  background: #f8fafc;
+}
+
+.profile-empty-links span {
+  flex: 1;
+  color: #334155;
+  font-size: 14px;
+}
+
+.profile-empty-links strong {
+  font-size: 12px;
+  color: #64748b;
+}
+
+@media (max-width: 800px) {
+  .student-profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .student-profile-tabs {
+    scrollbar-width: thin;
+  }
+}
