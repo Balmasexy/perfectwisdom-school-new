@@ -29,6 +29,7 @@ import { browserSupportsWebAuthn, startAuthentication, startRegistration } from 
 import './App.css'
 import { apiRequest, setAuthToken } from './api'
 import Payments from './Payments'
+import JambRegistration from './JambRegistration'
 
 type Page = 'landing' | 'login' | 'create-account' | 'dashboard'
 type Role = 'Admin' | 'Staff' | 'Parent'
@@ -1945,7 +1946,7 @@ function Dashboard({
         ['Branches', loading ? '—' : String(summary.branches)],
         ['Attendance', '0%'],
       ],
-      nav: ['Dashboard', 'Students', 'Staff', 'Branches', 'Attendance', 'Classes', 'Reports', 'Settings', 'Device Security', 'Payments'],
+      nav: ['Dashboard', 'Students', 'Staff', 'Branches', 'JAMB Registration Centre', 'Attendance', 'Classes', 'Reports', 'Settings', 'Device Security', 'Payments'],
       panels: [
         {
           title: 'School Administration',
@@ -2063,6 +2064,7 @@ function Dashboard({
               Reports: BarChart3,
               Settings: Settings,
               Payments: CreditCard,
+              'JAMB Registration Centre': ClipboardCheck,
               'Device Security': ShieldCheck,
               'My Students': Users,
               Assignments: ClipboardCheck,
@@ -2134,6 +2136,8 @@ function Dashboard({
             <DeviceSecurity />
           ) : activeSection === 'Payments' ? (
             <Payments />
+          ) : role === 'Admin' && activeSection === 'JAMB Registration Centre' ? (
+            <JambRegistration />
           ) : role === 'Admin' && activeSection === 'Staff' ? (
             <StaffManagement />
           ) : role === 'Admin' && activeSection === 'Branches' ? (
