@@ -1947,7 +1947,7 @@ function Dashboard({
         ['Branches', loading ? '—' : String(summary.branches)],
         ['Attendance', '0%'],
       ],
-      nav: ['Dashboard', 'Students', 'Staff', 'Branches', 'JAMB Registration Centre', 'Attendance', 'Classes', 'Reports', 'Settings', 'Device Security', 'Payments'],
+      nav: ['Dashboard', 'Students', 'Staff', 'Branches', 'JAMB Registration Centre', 'WAEC Registration', 'NECO Registration', 'Attendance', 'Classes', 'Reports', 'Settings', 'Device Security', 'Payments'],
       panels: [
         {
           title: 'School Administration',
@@ -2066,6 +2066,8 @@ function Dashboard({
               Settings: Settings,
               Payments: CreditCard,
               'JAMB Registration Centre': ClipboardCheck,
+              'WAEC Registration': ClipboardCheck,
+              'NECO Registration': ClipboardCheck,
               'Device Security': ShieldCheck,
               'My Students': Users,
               Assignments: ClipboardCheck,
