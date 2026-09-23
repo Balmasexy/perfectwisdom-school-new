@@ -576,6 +576,58 @@ export async function authRoutes(app: FastifyInstance) {
   })
 
   /*
+   * ONE-TIME ADMIN PASSWORD RESET
+   * Temporary route. Remove after the production password is changed.
+   */
+  app.post('/auth/admin-password-reset', async (request, reply) => {
+    const resetSecret = env('ADMIN_PASSWORD_RESET_SECRET')
+
+    if (!resetSecret) {
+      return reply.code(404).send({ error: 'Not found' })
+    }
+
+    const body = request.body as {
+      secret?: string
+      email?: string
+      password?: string
+    }
+
+    if (body.secret !== resetSecret) {
+      return reply.code(401).send({ error: 'Invalid reset secret' })
+    }
+
+    const email = body.email?.trim().toLowerCase()
+    const password = body.password
+
+    if (!email || !password || password.length < 12) {
+      return reply.code(400).send({
+        error: 'Email and a password of at least 12 characters are required',
+      })
+    }
+
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+
+    if (!user) {
+      return reply.code(404).send({ error: 'User not found' })
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12)
+
+    await db
+      .update(users)
+      .set({ passwordHash })
+      .where(eq(users.id, user.id))
+
+    return {
+      success: true,
+      message: 'Password updated successfully',
+    }
+  })
+
+  /*
    * CURRENT USER
    */
   app.get('/auth/me', async (request, reply) => {
