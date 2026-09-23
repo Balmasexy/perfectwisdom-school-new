@@ -1055,20 +1055,6 @@ function BranchManagement() {
       setSaving(true)
       setError('')
 
-      await apiRequest('/branches',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name: form.name,
-            code: form.code,
-            address: form.address,
-            phoneNumber: form.phoneNumber,
-          }),
-        }
-      )
 
       await apiRequest('/branches', {
         method: 'POST',
