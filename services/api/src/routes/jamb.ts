@@ -64,7 +64,7 @@ export async function jambRoutes(app: FastifyInstance) {
       const result = await db.execute(sql`
         SELECT
           jr.*,
-          b.branch_id AS branch_code,
+          b.code AS branch_code,
           b.name AS branch_name
         FROM jamb_registrations jr
         LEFT JOIN branches b ON b.id = jr.branch_id
@@ -85,7 +85,7 @@ export async function jambRoutes(app: FastifyInstance) {
       const result = await db.execute(sql`
         SELECT
           jr.*,
-          b.branch_id AS branch_code,
+          b.code AS branch_code,
           b.name AS branch_name
         FROM jamb_registrations jr
         LEFT JOIN branches b ON b.id = jr.branch_id

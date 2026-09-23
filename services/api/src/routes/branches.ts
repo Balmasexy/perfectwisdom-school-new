@@ -5,7 +5,7 @@ import { branches } from '../db/schema.js'
 import { requireRoles } from './auth.js'
 
 export async function branchRoutes(app: FastifyInstance) {
-  app.get('/branches', { preHandler: requireRoles('ADMIN') }, async () => {
+  app.get('/branches', { preHandler: requireRoles('ADMIN', 'STAFF') }, async () => {
     return db.select().from(branches)
   })
 

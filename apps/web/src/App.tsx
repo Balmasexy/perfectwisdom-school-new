@@ -30,6 +30,7 @@ import './App.css'
 import { apiRequest, setAuthToken } from './api'
 import Payments from './Payments'
 import JambRegistration from './JambRegistration'
+import ExamRegistration from './ExamRegistration'
 
 type Page = 'landing' | 'login' | 'create-account' | 'dashboard'
 type Role = 'Admin' | 'Staff' | 'Parent'
@@ -2136,8 +2137,12 @@ function Dashboard({
             <DeviceSecurity />
           ) : activeSection === 'Payments' ? (
             <Payments />
-          ) : role === 'Admin' && activeSection === 'JAMB Registration Centre' ? (
+          ) : (role === 'Admin' || role === 'Staff') && activeSection === 'JAMB Registration Centre' ? (
             <JambRegistration />
+          ) : (role === 'Admin' || role === 'Staff') && activeSection === 'WAEC Registration' ? (
+            <ExamRegistration examType="WAEC" />
+          ) : (role === 'Admin' || role === 'Staff') && activeSection === 'NECO Registration' ? (
+            <ExamRegistration examType="NECO" />
           ) : role === 'Admin' && activeSection === 'Staff' ? (
             <StaffManagement />
           ) : role === 'Admin' && activeSection === 'Branches' ? (
