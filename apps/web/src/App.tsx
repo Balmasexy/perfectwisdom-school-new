@@ -30,7 +30,7 @@ import './App.css'
 import { apiRequest, setAuthToken } from './api'
 import Payments from './Payments'
 
-type Page = 'landing' | 'login' | 'dashboard'
+type Page = 'landing' | 'login' | 'create-account' | 'dashboard'
 type Role = 'Admin' | 'Staff' | 'Parent'
 
 const roles: { name: Role; description: string; icon: typeof ShieldCheck }[] = [
@@ -369,16 +369,270 @@ function Landing({ onLogin }: { onLogin: () => void }) {
   )
 }
 
+function CreateAccount({
+  onBack,
+  onLogin,
+}: {
+  onBack: () => void
+  onLogin: () => void
+}) {
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [otherName, setOtherName] = useState('')
+  const [email, setEmail] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [address, setAddress] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const [accountId, setAccountId] = useState('')
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError('')
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.')
+      return
+    }
+
+    setSubmitting(true)
+
+    try {
+      const data = await apiRequest<{
+        token: string
+        user: {
+          accountId: string
+          role: string
+        }
+      }>('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          otherName,
+          email,
+          phoneNumber,
+          address,
+          password,
+        }),
+      })
+
+      setAuthToken(data.token)
+      setAccountId(data.user.accountId)
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Unable to create your account',
+      )
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  if (accountId) {
+    return (
+      <div className="account-page">
+        <div className="account-card">
+          <div className="mobile-login-logo">
+            <Logo />
+          </div>
+
+          <div className="account-success-icon">
+            <CheckCircle2 size={34} />
+          </div>
+
+          <span className="section-kicker">ACCOUNT CREATED</span>
+          <h1>Welcome to Perfect Wisdom School</h1>
+          <p>Your Parent / Guardian account has been created successfully.</p>
+
+          <div className="account-id-card">
+            <span>Your school account ID</span>
+            <strong>{accountId}</strong>
+            <small>Keep this ID for your school records.</small>
+          </div>
+
+          <button
+            className="login-button"
+            type="button"
+            onClick={onLogin}
+          >
+            Continue to sign in
+            <ArrowRight size={18} />
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="account-page">
+      <div className="account-card">
+        <button className="back-link account-back" onClick={onBack}>
+          ← Back to login
+        </button>
+
+        <div className="mobile-login-logo">
+          <Logo />
+        </div>
+
+        <div className="login-heading">
+          <span>NEW SCHOOL ACCOUNT</span>
+          <h2>Create your account</h2>
+          <p>
+            Create a Parent / Guardian account to access Perfect Wisdom
+            School.
+          </p>
+        </div>
+
+        {error && <div className="management-error">{error}</div>}
+
+        <form onSubmit={handleSubmit} className="account-form">
+          <div className="account-form-grid">
+            <label>
+              First name
+              <input
+                value={firstName}
+                onChange={(event) => setFirstName(event.target.value)}
+                placeholder="First name"
+                autoComplete="given-name"
+                required
+              />
+            </label>
+
+            <label>
+              Last name
+              <input
+                value={lastName}
+                onChange={(event) => setLastName(event.target.value)}
+                placeholder="Last name"
+                autoComplete="family-name"
+                required
+              />
+            </label>
+          </div>
+
+          <label>
+            Other name <span className="optional-field">(optional)</span>
+            <input
+              value={otherName}
+              onChange={(event) => setOtherName(event.target.value)}
+              placeholder="Other name"
+              autoComplete="additional-name"
+            />
+          </label>
+
+          <label>
+            Email address
+            <input
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="you@example.com"
+              autoComplete="email"
+              required
+            />
+          </label>
+
+          <label>
+            Phone number
+            <input
+              type="tel"
+              value={phoneNumber}
+              onChange={(event) => setPhoneNumber(event.target.value)}
+              placeholder="Phone number"
+              autoComplete="tel"
+              required
+            />
+          </label>
+
+          <label>
+            Address <span className="optional-field">(optional)</span>
+            <input
+              value={address}
+              onChange={(event) => setAddress(event.target.value)}
+              placeholder="Home address"
+              autoComplete="street-address"
+            />
+          </label>
+
+          <label>
+            Password
+            <div className="password-field">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="At least 8 characters"
+                autoComplete="new-password"
+                minLength={8}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label="Show password"
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
+          </label>
+
+          <label>
+            Confirm password
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              placeholder="Repeat your password"
+              autoComplete="new-password"
+              minLength={8}
+              required
+            />
+          </label>
+
+          <div className="account-role-note">
+            <ShieldCheck size={17} />
+            New public accounts are created as Parent / Guardian accounts.
+            Admin and Staff accounts are controlled by the school.
+          </div>
+
+          <button
+            className="login-button"
+            type="submit"
+            disabled={submitting}
+          >
+            {submitting ? 'Creating account…' : 'Create Parent account'}
+            {!submitting && <ArrowRight size={18} />}
+          </button>
+        </form>
+
+        <div className="account-existing">
+          Already have an account?
+          <button type="button" onClick={onLogin}>
+            Sign in
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function Login({
   role,
   setRole,
   onBack,
   onDashboard,
+  onCreateAccount,
 }: {
   role: Role
   setRole: (role: Role) => void
   onBack: () => void
   onDashboard: () => void
+  onCreateAccount: () => void
 }) {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
@@ -633,6 +887,19 @@ function Login({
           </div>
 
           {error && <div className="management-error">{error}</div>}
+
+          <button
+            type="button"
+            className="login-create-account"
+            onClick={onCreateAccount}
+          >
+            <UserRoundCheck size={18} />
+            <span>
+              <strong>Create a new account</strong>
+              <small>Parent / Guardian registration</small>
+            </span>
+            <ChevronRight size={18} />
+          </button>
 
           <form onSubmit={handleLogin}>
             <label>
@@ -1943,6 +2210,16 @@ export default function App() {
         setRole={changeRole}
         onBack={() => setPage('landing')}
         onDashboard={() => setPage('dashboard')}
+        onCreateAccount={() => setPage('create-account')}
+      />
+    )
+  }
+
+  if (page === 'create-account') {
+    return (
+      <CreateAccount
+        onBack={() => setPage('login')}
+        onLogin={() => setPage('login')}
       />
     )
   }

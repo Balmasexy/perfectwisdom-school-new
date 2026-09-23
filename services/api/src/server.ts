@@ -7,8 +7,11 @@ import { staffRoutes } from './routes/staff.js'
 import { branchRoutes } from './routes/branches.js'
 import { authRoutes } from './routes/auth.js'
 import { paymentRoutes } from './routes/payments.js'
+import { ensureAccountIdSchema } from './db/account-id-migration.js'
 
 dotenv.config()
+
+await ensureAccountIdSchema()
 
 const app = Fastify({
   logger: true,

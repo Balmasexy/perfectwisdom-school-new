@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { eq } from 'drizzle-orm'
 import { db } from '../db/client.js'
+import { generateAccountId } from '../db/account-id.js'
 import { staff } from '../db/schema.js'
 import { requireRoles } from './auth.js'
 
@@ -51,7 +52,7 @@ export async function staffRoutes(app: FastifyInstance) {
       })
     }
 
-    const staffId = `PWS-STF-${Date.now().toString().slice(-8)}`
+    const staffId = await generateAccountId('STAFF')
 
     const [created] = await db
       .insert(staff)

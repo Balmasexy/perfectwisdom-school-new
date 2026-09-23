@@ -9,9 +9,11 @@ import {
 } from '@simplewebauthn/server'
 import { and, eq, gt } from 'drizzle-orm'
 import { db } from '../db/client.js'
+import { generateAccountId } from '../db/account-id.js'
 import {
   authChallenges,
   googleIdentities,
+  parents,
   passkeys,
   users,
 } from '../db/schema.js'
@@ -182,6 +184,139 @@ export async function authRoutes(app: FastifyInstance) {
         role: user.role,
         status: user.status,
       },
+    }
+  })
+
+  /*
+   * PARENT/GUARDIAN SELF REGISTRATION
+   *
+   * Public registration creates PARENT accounts only.
+   * ADMIN and STAFF accounts remain school-controlled.
+   */
+  app.post('/auth/register', async (request, reply) => {
+    const body = request.body as {
+      firstName?: string
+      lastName?: string
+      otherName?: string
+      email?: string
+      phoneNumber?: string
+      address?: string
+      password?: string
+    }
+
+    const firstName = body.firstName?.trim()
+    const lastName = body.lastName?.trim()
+    const otherName = body.otherName?.trim() || null
+    const email = body.email?.trim().toLowerCase()
+    const phoneNumber = body.phoneNumber?.trim()
+    const address = body.address?.trim() || null
+    const password = body.password
+
+    if (!firstName || !lastName || !email || !phoneNumber || !password) {
+      return reply.code(400).send({
+        error:
+          'First name, last name, email, phone number and password are required',
+      })
+    }
+
+    if (password.length < 8) {
+      return reply.code(400).send({
+        error: 'Password must be at least 8 characters',
+      })
+    }
+
+    const [existingEmail] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+
+    if (existingEmail) {
+      return reply.code(409).send({
+        error: 'An account with this email already exists',
+      })
+    }
+
+    const [existingPhone] = await db
+      .select()
+      .from(users)
+      .where(eq(users.phoneNumber, phoneNumber))
+
+    if (existingPhone) {
+      return reply.code(409).send({
+        error: 'An account with this phone number already exists',
+      })
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12)
+    const accountId = await generateAccountId('PARENT')
+
+    try {
+      const result = await db.transaction(async (tx) => {
+        const [createdUser] = await tx
+          .insert(users)
+          .values({
+            accountId,
+            email,
+            passwordHash,
+            role: 'PARENT',
+            status: 'ACTIVE',
+            phoneNumber,
+          })
+          .returning()
+
+        if (!createdUser) {
+          throw new Error('Unable to create user account')
+        }
+
+        const [createdParent] = await tx
+          .insert(parents)
+          .values({
+            userId: createdUser.id,
+            firstName,
+            lastName,
+            otherName,
+            phoneNumber,
+            email,
+            address,
+          })
+          .returning()
+
+        if (!createdParent) {
+          throw new Error('Unable to create parent profile')
+        }
+
+        return {
+          user: createdUser,
+          parent: createdParent,
+        }
+      })
+
+      const token = await issueToken(app, result.user)
+
+      return reply.code(201).send({
+        token,
+        user: {
+          id: result.user.id,
+          accountId: result.user.accountId,
+          email: result.user.email,
+          role: result.user.role,
+          status: result.user.status,
+        },
+        parent: {
+          id: result.parent.id,
+          firstName: result.parent.firstName,
+          lastName: result.parent.lastName,
+          otherName: result.parent.otherName,
+          phoneNumber: result.parent.phoneNumber,
+          email: result.parent.email,
+          address: result.parent.address,
+        },
+      })
+    } catch (error) {
+      request.log.error(error, 'Parent registration failed')
+      return reply.code(500).send({
+        error: 'Unable to create account. Please try again.',
+      })
     }
   })
 
