@@ -5,6 +5,7 @@ import { apiRequest } from './api'
 type Branch = {
   id: string
   code?: string
+  branch_code?: string
   name: string
 }
 
@@ -194,24 +195,24 @@ export default function JambRegistration() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-6">
+    <div className="relative isolate space-y-6 bg-slate-50/40 p-1 md:p-2">
       <div className="mx-auto max-w-7xl space-y-6">
         <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-sm font-semibold text-green-700">
+              <p className="inline-flex w-fit items-center rounded-full bg-green-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-green-700">
                 Perfect Wisdom School
               </p>
               <h1 className="mt-1 text-2xl font-bold text-slate-900">
                 JAMB Registration Centre
               </h1>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
                 Manage candidate registration, payment records and registration
                 history.
               </p>
             </div>
 
-            <div className="rounded-xl bg-amber-50 px-4 py-3 text-xs text-amber-800 ring-1 ring-amber-100">
+            <div className="max-w-md rounded-xl bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-800 ring-1 ring-amber-100">
               Internal PWS workflow — this is not a direct official JAMB API or
               JAMB portal integration.
             </div>
@@ -433,7 +434,7 @@ export default function JambRegistration() {
                 <option value="">Select branch</option>
                 {branches.map((branch) => (
                   <option key={branch.id} value={branch.id}>
-                    {branch.code ? `${branch.code} — ` : ''}
+                    {branch.code || branch.branch_code ? `${branch.code || branch.branch_code} — ` : ''}
                     {branch.name}
                   </option>
                 ))}
