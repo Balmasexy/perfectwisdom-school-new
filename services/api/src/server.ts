@@ -9,15 +9,18 @@ import { authRoutes } from './routes/auth.js'
 import { paymentRoutes } from './routes/payments.js'
 import { jambRoutes } from './routes/jamb.js'
 import { examRegistrationRoutes } from './routes/exam-registrations.js'
+import { studentRoutes } from './routes/students.js'
 import { ensureAccountIdSchema } from './db/account-id-migration.js'
 import { ensureJambRegistrationSchema } from './db/jamb-migration.js'
 import { ensureExamRegistrationSchema } from './db/exam-registration-migration.js'
+import { ensureStudentSchema } from './db/student-migration.js'
 
 dotenv.config()
 
 await ensureAccountIdSchema()
 await ensureJambRegistrationSchema()
 await ensureExamRegistrationSchema()
+await ensureStudentSchema()
 
 
 const app = Fastify({
@@ -40,6 +43,7 @@ await app.register(authRoutes)
 await app.register(paymentRoutes)
 await app.register(jambRoutes)
 await app.register(examRegistrationRoutes)
+await app.register(studentRoutes)
 
 app.get('/health', async () => {
   return {
