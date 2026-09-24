@@ -13,7 +13,7 @@ type ClassBody = {
 
 export async function classRoutes(app: FastifyInstance) {
   app.get('/classes', {
-    preHandler: requireRoles('ADMIN'),
+    preHandler: requireRoles('ADMIN', 'STAFF'),
   }, async (request) => {
     const query = request.query as {
       search?: string
@@ -63,7 +63,7 @@ export async function classRoutes(app: FastifyInstance) {
   })
 
   app.get('/classes/:id', {
-    preHandler: requireRoles('ADMIN'),
+    preHandler: requireRoles('ADMIN', 'STAFF'),
   }, async (request, reply) => {
     const { id } = request.params as { id: string }
 
