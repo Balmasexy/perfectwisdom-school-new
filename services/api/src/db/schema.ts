@@ -167,6 +167,7 @@ export const students = pgTable(
     address: text('address'),
     branchId: uuid('branch_id').references(() => branches.id, { onDelete: 'set null' }),
     parentId: uuid('parent_id').references(() => parents.id, { onDelete: 'set null' }),
+    classId: uuid('class_id').references(() => classes.id, { onDelete: 'set null' }),
     status: userStatusEnum('status').default('ACTIVE').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),

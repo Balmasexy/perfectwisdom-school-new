@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { and, eq, ilike, or, sql } from 'drizzle-orm'
 import { db } from '../db/client.js'
-import { branches, parents, students } from '../db/schema.js'
+import { branches, classes, parents, students } from '../db/schema.js'
 import { requireRoles } from './auth.js'
 
 type StudentBody = {
@@ -14,6 +14,7 @@ type StudentBody = {
   address?: string
   branchId?: string
   parentId?: string
+  classId?: string
   status?: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
 }
 
@@ -79,6 +80,9 @@ export async function studentRoutes(app: FastifyInstance) {
           branchName: branches.name,
           branchCode: branches.code,
           parentId: students.parentId,
+          classId: students.classId,
+          className: classes.name,
+          classCode: classes.code,
           parentFirstName: parents.firstName,
           parentLastName: parents.lastName,
           parentPhoneNumber: parents.phoneNumber,
@@ -89,6 +93,7 @@ export async function studentRoutes(app: FastifyInstance) {
         .from(students)
         .leftJoin(branches, eq(students.branchId, branches.id))
         .leftJoin(parents, eq(students.parentId, parents.id))
+        .leftJoin(classes, eq(students.classId, classes.id))
         .where(whereClause)
         .orderBy(sql`${students.createdAt} DESC`)
 
@@ -148,6 +153,9 @@ export async function studentRoutes(app: FastifyInstance) {
           branchName: branches.name,
           branchCode: branches.code,
           parentId: students.parentId,
+          classId: students.classId,
+          className: classes.name,
+          classCode: classes.code,
           parentFirstName: parents.firstName,
           parentLastName: parents.lastName,
           parentPhoneNumber: parents.phoneNumber,
@@ -159,6 +167,7 @@ export async function studentRoutes(app: FastifyInstance) {
         .from(students)
         .leftJoin(branches, eq(students.branchId, branches.id))
         .leftJoin(parents, eq(students.parentId, parents.id))
+        .leftJoin(classes, eq(students.classId, classes.id))
         .where(eq(students.id, id))
 
       if (!student) {
@@ -222,6 +231,19 @@ export async function studentRoutes(app: FastifyInstance) {
         }
       }
 
+      if (body.classId) {
+        const [schoolClass] = await db
+          .select({ id: classes.id })
+          .from(classes)
+          .where(eq(classes.id, body.classId))
+
+        if (!schoolClass) {
+          return reply.code(400).send({
+            error: 'Selected class was not found',
+          })
+        }
+      }
+
       const result = await db.transaction(async (tx) => {
         const sequence = await tx.execute(sql`
           SELECT nextval('pws_student_id_seq') AS value
@@ -252,6 +274,7 @@ export async function studentRoutes(app: FastifyInstance) {
             address: clean(body.address),
             branchId: body.branchId || null,
             parentId: body.parentId || null,
+            classId: body.classId || null,
             status: body.status || 'ACTIVE',
           })
           .returning()
@@ -310,6 +333,19 @@ export async function studentRoutes(app: FastifyInstance) {
         }
       }
 
+      if (body.classId) {
+        const [schoolClass] = await db
+          .select({ id: classes.id })
+          .from(classes)
+          .where(eq(classes.id, body.classId))
+
+        if (!schoolClass) {
+          return reply.code(400).send({
+            error: 'Selected class was not found',
+          })
+        }
+      }
+
       const [updated] = await db
         .update(students)
         .set({
@@ -339,6 +375,9 @@ export async function studentRoutes(app: FastifyInstance) {
             : {}),
           ...(body.parentId !== undefined
             ? { parentId: body.parentId || null }
+            : {}),
+          ...(body.classId !== undefined
+            ? { classId: body.classId || null }
             : {}),
           ...(body.status !== undefined
             ? { status: body.status }

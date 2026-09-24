@@ -14,6 +14,7 @@ import { ensureAccountIdSchema } from './db/account-id-migration.js'
 import { ensureJambRegistrationSchema } from './db/jamb-migration.js'
 import { ensureExamRegistrationSchema } from './db/exam-registration-migration.js'
 import { ensureStudentSchema } from './db/student-migration.js'
+import { ensureStudentClassSchema } from './db/student-class-migration.js'
 
 dotenv.config()
 
@@ -21,6 +22,7 @@ await ensureAccountIdSchema()
 await ensureJambRegistrationSchema()
 await ensureExamRegistrationSchema()
 await ensureStudentSchema()
+await ensureStudentClassSchema()
 
 
 const app = Fastify({
