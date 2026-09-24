@@ -13,6 +13,15 @@ import {
 } from 'lucide-react'
 import { apiRequest } from './api'
 
+type SchoolClass = {
+  id: string
+  name: string
+  code: string
+  branchId: string | null
+  branchName: string | null
+  studentCount: number
+}
+
 type Student = {
   id: string
   studentId: string
@@ -23,8 +32,12 @@ type Student = {
   dateOfBirth: string | null
   gender: string | null
   address: string | null
+  branchId: string | null
   branchName: string | null
   branchCode: string | null
+  classId: string | null
+  className: string | null
+  classCode: string | null
   parentFirstName: string | null
   parentLastName: string | null
   parentPhoneNumber: string | null
@@ -38,8 +51,12 @@ type Props = {
 
 export default function StudentProfile({ studentId, onBack }: Props) {
   const [student, setStudent] = useState<Student | null>(null)
+  const [classes, setClasses] = useState<SchoolClass[]>([])
+  const [selectedClassId, setSelectedClassId] = useState('')
   const [loading, setLoading] = useState(true)
+  const [savingClass, setSavingClass] = useState(false)
   const [error, setError] = useState('')
+  const [classMessage, setClassMessage] = useState('')
 
   useEffect(() => {
     let cancelled = false
@@ -49,10 +66,15 @@ export default function StudentProfile({ studentId, onBack }: Props) {
         setLoading(true)
         setError('')
 
-        const data = await apiRequest<Student>(`/students/${studentId}`)
+        const [data, classData] = await Promise.all([
+          apiRequest<Student>(`/students/${studentId}`),
+          apiRequest<SchoolClass[]>('/classes'),
+        ])
 
         if (!cancelled) {
           setStudent(data)
+          setClasses(classData || [])
+          setSelectedClassId(data.classId || '')
         }
       } catch (err) {
         if (!cancelled) {
@@ -75,6 +97,39 @@ export default function StudentProfile({ studentId, onBack }: Props) {
       cancelled = true
     }
   }, [studentId])
+
+  async function saveClassAssignment() {
+    if (!student) return
+
+    try {
+      setSavingClass(true)
+      setClassMessage('')
+      setError('')
+
+      const updated = await apiRequest<Student>(`/students/${student.id}`, {
+        method: 'PATCH',
+        body: {
+          classId: selectedClassId || undefined,
+        },
+      })
+
+      setStudent(updated)
+      setSelectedClassId(updated.classId || '')
+      setClassMessage(
+        selectedClassId
+          ? 'Student class assignment saved successfully.'
+          : 'Student removed from the current class.',
+      )
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Unable to save class assignment',
+      )
+    } finally {
+      setSavingClass(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -259,9 +314,68 @@ export default function StudentProfile({ studentId, onBack }: Props) {
             </div>
 
             <div>
+              <span>Current Class</span>
+              <strong>
+                {student.className
+                  ? `${student.className}${student.classCode ? ` (${student.classCode})` : ''}`
+                  : 'Not assigned'}
+              </strong>
+            </div>
+
+            <div>
               <span>Status</span>
               <strong>{student.status}</strong>
             </div>
+          </div>
+
+          <div className="student-class-assignment">
+            <div>
+              <strong>Assign Student to Class</strong>
+              <p>
+                Select the student's current class. The assignment is saved
+                directly to the student record.
+              </p>
+            </div>
+
+            <div className="student-class-assignment-row">
+              <select
+                value={selectedClassId}
+                onChange={(event) => {
+                  setSelectedClassId(event.target.value)
+                  setClassMessage('')
+                }}
+              >
+                <option value="">No class assigned</option>
+                {classes
+                  .filter(
+                    (schoolClass) =>
+                      !student.branchId ||
+                      !schoolClass.branchId ||
+                      schoolClass.branchId === student.branchId,
+                  )
+                  .map((schoolClass) => (
+                    <option key={schoolClass.id} value={schoolClass.id}>
+                      {schoolClass.name} ({schoolClass.code})
+                      {schoolClass.branchName
+                        ? ` — ${schoolClass.branchName}`
+                        : ''}
+                    </option>
+                  ))}
+              </select>
+
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => void saveClassAssignment()}
+                disabled={savingClass}
+              >
+                {savingClass ? 'Saving...' : 'Save Class'}
+              </button>
+            </div>
+
+            {classMessage && (
+              <div className="module-success">{classMessage}</div>
+            )}
           </div>
         </section>
 
