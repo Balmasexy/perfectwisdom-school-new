@@ -10,6 +10,7 @@ import { paymentRoutes } from './routes/payments.js'
 import { jambRoutes } from './routes/jamb.js'
 import { examRegistrationRoutes } from './routes/exam-registrations.js'
 import { studentRoutes } from './routes/students.js'
+import { classRoutes } from './routes/classes.js'
 import { ensureAccountIdSchema } from './db/account-id-migration.js'
 import { ensureJambRegistrationSchema } from './db/jamb-migration.js'
 import { ensureExamRegistrationSchema } from './db/exam-registration-migration.js'
@@ -46,6 +47,7 @@ await app.register(paymentRoutes)
 await app.register(jambRoutes)
 await app.register(examRegistrationRoutes)
 await app.register(studentRoutes)
+await app.register(classRoutes)
 
 app.get('/health', async () => {
   return {
