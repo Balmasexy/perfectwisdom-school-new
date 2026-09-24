@@ -33,6 +33,7 @@ import JambRegistration from './JambRegistration'
 import ExamRegistration from './ExamRegistration'
 import ModuleWorkspace from './ModuleWorkspace'
 import Students from './Students'
+import Classes from './Classes'
 
 type Page = 'landing' | 'login' | 'create-account' | 'dashboard'
 type Role = 'Admin' | 'Staff' | 'Parent'
@@ -2137,6 +2138,8 @@ function Dashboard({
             <StaffManagement />
           ) : (role === 'Admin' || role === 'Staff') && activeSection === 'Students' ? (
             <Students />
+          ) : (role === 'Admin' || role === 'Staff') && activeSection === 'Classes' ? (
+            <Classes />
           ) : role === 'Admin' && activeSection === 'Branches' ? (
             <BranchManagement />
           ) : activeSection !== 'Dashboard' ? (
