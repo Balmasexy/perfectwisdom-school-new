@@ -29,7 +29,7 @@ import { browserSupportsWebAuthn, startAuthentication, startRegistration } from 
 import './App.css'
 import { apiRequest, setAuthToken } from './api'
 import Payments from './Payments'
-import JambRegistration from './JambRegistration'
+import EntranceAdmissions from './EntranceAdmissions'
 import ExamRegistration from './ExamRegistration'
 import ModuleWorkspace from './ModuleWorkspace'
 import Students from './Students'
@@ -1936,7 +1936,7 @@ function Dashboard({
         ['Branches', loading ? '—' : String(summary.branches)],
         ['Attendance', '0%'],
       ],
-      nav: ['Dashboard', 'Students', 'Staff', 'Branches', 'JAMB Registration Centre', 'WAEC Registration', 'NECO Registration', 'Attendance', 'Classes', 'Reports', 'Settings', 'Device Security', 'Payments'],
+      nav: ['Dashboard', 'Students', 'Staff', 'Branches', 'Admissions & Entrance', 'WAEC Registration', 'NECO Registration', 'Attendance', 'Classes', 'Reports', 'Settings', 'Device Security', 'Payments'],
       panels: [
         {
           title: 'School Administration',
@@ -2054,7 +2054,7 @@ function Dashboard({
               Reports: BarChart3,
               Settings: Settings,
               Payments: CreditCard,
-              'JAMB Registration Centre': ClipboardCheck,
+              'Admissions & Entrance': ClipboardCheck,
               'WAEC Registration': ClipboardCheck,
               'NECO Registration': ClipboardCheck,
               'Device Security': ShieldCheck,
@@ -2128,8 +2128,8 @@ function Dashboard({
             <DeviceSecurity />
           ) : activeSection === 'Payments' ? (
             <Payments />
-          ) : (role === 'Admin' || role === 'Staff') && activeSection === 'JAMB Registration Centre' ? (
-            <JambRegistration />
+          ) : (role === 'Admin' || role === 'Staff') && activeSection === 'Admissions & Entrance' ? (
+            <EntranceAdmissions />
           ) : (role === 'Admin' || role === 'Staff') && activeSection === 'WAEC Registration' ? (
             <ExamRegistration examType="WAEC" />
           ) : (role === 'Admin' || role === 'Staff') && activeSection === 'NECO Registration' ? (
