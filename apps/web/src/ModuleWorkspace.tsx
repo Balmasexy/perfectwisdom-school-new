@@ -670,6 +670,118 @@ function AcademicSessionWorkspace({
   )
 }
 
+function SettingsWorkspace({ role }: { role: 'Admin' | 'Staff' | 'Parent' }) {
+  const [open, setOpen] = useState<string | null>('school')
+
+  const toggle = (id: string) => {
+    setOpen((current) => (current === id ? null : id))
+  }
+
+  const sections = [
+    {
+      id: 'school',
+      title: 'School Information',
+      description: 'Manage the school identity and contact information.',
+      icon: GraduationCap,
+      content: (
+        <div className="settings-form-grid">
+          <label><span>School Name</span><input placeholder="Perfect Wisdom School" /></label>
+          <label><span>School Email</span><input type="email" placeholder="school@example.com" /></label>
+          <label><span>Phone Number</span><input placeholder="+234..." /></label>
+          <label><span>School Address</span><input placeholder="School address" /></label>
+          <label><span>Website</span><input placeholder="https://..." /></label>
+          <label><span>School Motto</span><input placeholder="School motto" /></label>
+          <button type="button" className="settings-primary">Save School Information</button>
+        </div>
+      ),
+    },
+    {
+      id: 'session',
+      title: 'Academic Session',
+      description: 'Manage academic years and the active term.',
+      icon: CalendarDays,
+      content: (
+        <div className="settings-inline-panel">
+          <p>Academic session management is available in the dedicated Academic Session workspace.</p>
+        </div>
+      ),
+    },
+    {
+      id: 'system',
+      title: 'System Preferences',
+      description: 'Control general application behaviour and display preferences.',
+      icon: Settings,
+      content: (
+        <div className="settings-preferences">
+          <label className="settings-switch-row">
+            <span><strong>School notifications</strong><small>Allow important school alerts and announcements.</small></span>
+            <input type="checkbox" defaultChecked />
+          </label>
+          <label className="settings-switch-row">
+            <span><strong>Automatic session reminders</strong><small>Show reminders for academic session and term changes.</small></span>
+            <input type="checkbox" defaultChecked />
+          </label>
+          <label className="settings-switch-row">
+            <span><strong>Compact tables</strong><small>Use denser tables on smaller screens.</small></span>
+            <input type="checkbox" />
+          </label>
+          <label className="settings-switch-row">
+            <span><strong>Confirm important actions</strong><small>Ask for confirmation before sensitive changes.</small></span>
+            <input type="checkbox" defaultChecked />
+          </label>
+        </div>
+      ),
+    },
+  ]
+
+  return (
+    <div className="settings-workspace">
+      <div className="settings-hero">
+        <div>
+          <span className="module-eyebrow">{role} Workspace</span>
+          <h1>School Settings</h1>
+          <p>Configure school information, academic sessions and system preferences.</p>
+        </div>
+        <div className="settings-hero-icon"><Settings size={24} /></div>
+      </div>
+
+      <div className="settings-accordion" role="list">
+        {sections.map(({ id, title, description, icon: Icon, content }) => {
+          const isOpen = open === id
+
+          return (
+            <section
+              key={id}
+              className={`settings-accordion-item ${isOpen ? 'is-open' : ''}`}
+              role="listitem"
+            >
+              <button
+                type="button"
+                className="settings-accordion-trigger"
+                aria-expanded={isOpen}
+                onClick={() => toggle(id)}
+              >
+                <span className="settings-accordion-icon"><Icon size={20} /></span>
+                <span className="settings-accordion-copy">
+                  <strong>{title}</strong>
+                  <small>{description}</small>
+                </span>
+                <span className="settings-accordion-chevron" aria-hidden="true">⌄</span>
+              </button>
+
+              {isOpen && (
+                <div className="settings-accordion-content">
+                  {content}
+                </div>
+              )}
+            </section>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 function ReportsWorkspace({ role }: { role: 'Admin' | 'Staff' | 'Parent' }) {
   const [report, setReport] = useState<'attendance' | 'academic' | 'financial'>('attendance')
   const [generated, setGenerated] = useState(false)
@@ -1097,6 +1209,10 @@ export default function ModuleWorkspace({
 
   if (section === 'Academic Session') {
     return <AcademicSessionWorkspace role={role} />
+  }
+
+  if (section === 'Settings') {
+    return <SettingsWorkspace role={role} />
   }
 
   if (section === 'Attendance') {
