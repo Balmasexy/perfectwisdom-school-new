@@ -7215,3 +7215,376 @@ body {
     min-height: 95px;
   }
 }
+
+/* =========================================================
+   WAEC / NECO — FINAL PROFESSIONAL REGISTRATION STRUCTURE
+   ========================================================= */
+
+.exam-registration-shell {
+  font-family: inherit;
+}
+
+.exam-registration-shell .exam-label {
+  display: block;
+  margin: 0 0 7px;
+  color: #243b53 !important;
+  font-size: 12px !important;
+  line-height: 1.35;
+  font-weight: 800 !important;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+
+.exam-registration-shell .exam-label::after {
+  content: '';
+}
+
+.exam-registration-shell input,
+.exam-registration-shell select,
+.exam-registration-shell textarea {
+  width: 100%;
+  min-height: 46px;
+  box-sizing: border-box;
+  border: 1px solid #cbd8e6 !important;
+  border-radius: 11px !important;
+  background: #ffffff !important;
+  color: #102a43 !important;
+  font-size: 14px !important;
+  line-height: 1.4;
+  opacity: 1 !important;
+}
+
+.exam-registration-shell input::placeholder,
+.exam-registration-shell textarea::placeholder {
+  color: #8a9aad !important;
+  opacity: 1;
+}
+
+.exam-registration-shell input:focus,
+.exam-registration-shell select:focus,
+.exam-registration-shell textarea:focus {
+  border-color: #1457a6 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(20,87,166,.10) !important;
+}
+
+.exam-registration-shell textarea {
+  min-height: 110px;
+  padding-top: 12px;
+}
+
+.exam-registration-shell input[type="file"] {
+  min-height: auto;
+  padding: 10px;
+}
+
+.exam-registration-shell button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.exam-workspace {
+  margin-top: 18px;
+  overflow: hidden;
+  border: 1px solid #d8e3ee;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(6,43,92,.07);
+}
+
+.exam-section-card {
+  background: #fff;
+}
+
+.exam-form-grid {
+  align-items: start;
+}
+
+.exam-form-grid > div {
+  min-width: 0;
+}
+
+.exam-form-grid-profile {
+  row-gap: 22px;
+}
+
+.exam-section-title {
+  position: relative;
+}
+
+.exam-section-title::before {
+  content: '';
+  display: block;
+  width: 42px;
+  height: 4px;
+  margin-bottom: 12px;
+  border-radius: 99px;
+  background: #f28c18;
+}
+
+.exam-section-title h2 {
+  font-size: 22px !important;
+  line-height: 1.25;
+}
+
+.exam-section-title p {
+  max-width: 720px;
+}
+
+/* Strong visual separation between registration areas */
+
+.exam-section-card + .exam-section-card {
+  border-top: 1px solid #e4ebf3;
+}
+
+.exam-section-card .exam-form-grid {
+  background: #f9fbfd;
+  border: 1px solid #e1e9f2;
+  border-radius: 15px;
+  padding: 18px;
+}
+
+.exam-section-card .exam-form-grid > div {
+  background: #fff;
+  border: 1px solid #e7edf4;
+  border-radius: 12px;
+  padding: 13px;
+}
+
+.exam-section-card .exam-form-grid > div:focus-within {
+  border-color: #b9cde2;
+  box-shadow: 0 4px 16px rgba(20,87,166,.06);
+}
+
+/* WAEC identity */
+
+.exam-waec .exam-section-title p,
+.exam-waec .exam-summary-card .text-green-700 {
+  color: #1457a6 !important;
+}
+
+.exam-waec .exam-section-title::before {
+  background: #1457a6;
+}
+
+.exam-waec .exam-step-active {
+  background: #1457a6 !important;
+  border-color: #1457a6 !important;
+}
+
+.exam-waec .exam-summary-card {
+  border-top: 3px solid #1457a6;
+}
+
+/* NECO identity */
+
+.exam-neco .exam-section-title p,
+.exam-neco .exam-summary-card .text-green-700 {
+  color: #15803d !important;
+}
+
+.exam-neco .exam-section-title::before {
+  background: #15803d;
+}
+
+.exam-neco .exam-step-active {
+  background: #15803d !important;
+  border-color: #15803d !important;
+}
+
+.exam-neco .exam-summary-card {
+  border-top: 3px solid #15803d;
+}
+
+/* Step progress */
+
+.exam-steps {
+  position: relative;
+}
+
+.exam-steps::after {
+  content: '';
+  display: block;
+  height: 3px;
+  margin: 13px 8px 0;
+  border-radius: 99px;
+  background: linear-gradient(
+    90deg,
+    #1457a6 0 25%,
+    #dce6f1 25% 100%
+  );
+}
+
+.exam-neco .exam-steps::after {
+  background: linear-gradient(
+    90deg,
+    #15803d 0 25%,
+    #dce6f1 25% 100%
+  );
+}
+
+/* Passport area */
+
+.exam-passport-layout {
+  align-items: start;
+  padding: 18px;
+  border: 1px solid #e1e9f2;
+  border-radius: 15px;
+  background: #f9fbfd;
+}
+
+.exam-passport-layout > div {
+  min-width: 0;
+}
+
+.exam-passport-layout input[type="file"] {
+  background: #fff !important;
+}
+
+/* History / Records */
+
+.exam-history-panel {
+  margin-top: 22px;
+  padding: 22px;
+  border: 1px solid #d8e3ee;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 25px rgba(6,43,92,.05);
+}
+
+.exam-history-panel > div:first-child {
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e6edf4;
+}
+
+.exam-history-panel table {
+  margin-top: 16px;
+}
+
+.exam-history-panel th {
+  background: #f5f8fc;
+}
+
+.exam-history-panel td {
+  vertical-align: middle;
+}
+
+/* Mobile structure */
+
+@media (max-width: 700px) {
+  .exam-registration-shell {
+    padding: 8px !important;
+  }
+
+  .exam-hero {
+    padding: 21px !important;
+    border-radius: 15px !important;
+  }
+
+  .exam-hero h1 {
+    font-size: 24px !important;
+  }
+
+  .exam-summary {
+    grid-template-columns: 1fr !important;
+    gap: 9px;
+  }
+
+  .exam-summary-card {
+    padding: 14px;
+  }
+
+  .exam-workspace {
+    border-radius: 15px;
+  }
+
+  .exam-steps {
+    padding: 10px !important;
+  }
+
+  .exam-steps .grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .exam-step {
+    min-height: 66px;
+    padding: 10px !important;
+  }
+
+  .exam-step .text-xs {
+    font-size: 11px !important;
+  }
+
+  .exam-section {
+    padding: 17px !important;
+  }
+
+  .exam-section-title {
+    margin-bottom: 16px;
+  }
+
+  .exam-section-title h2 {
+    font-size: 19px !important;
+  }
+
+  .exam-section-card .exam-form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 11px !important;
+    padding: 10px;
+  }
+
+  .exam-section-card .exam-form-grid > div {
+    padding: 12px;
+  }
+
+  .exam-registration-shell .exam-label {
+    font-size: 10px !important;
+    margin-bottom: 6px;
+  }
+
+  .exam-registration-shell input,
+  .exam-registration-shell select,
+  .exam-registration-shell textarea {
+    min-height: 45px;
+    font-size: 14px !important;
+  }
+
+  .exam-passport-layout {
+    grid-template-columns: 1fr !important;
+    padding: 12px;
+  }
+
+  .exam-history-panel {
+    padding: 15px;
+    border-radius: 15px;
+  }
+
+  .exam-history-panel > div:first-child {
+    gap: 12px;
+  }
+
+  .exam-history-panel select {
+    min-width: 0;
+  }
+
+  .exam-table-wrap {
+    overflow-x: auto;
+  }
+}
+
+/* Prevent the browser/device dark-input appearance from overriding
+   the examination workspace. */
+
+@media (prefers-color-scheme: dark) {
+  .exam-registration-shell input,
+  .exam-registration-shell select,
+  .exam-registration-shell textarea {
+    background: #fff !important;
+    color: #102a43 !important;
+    color-scheme: light;
+  }
+
+  .exam-registration-shell input::placeholder,
+  .exam-registration-shell textarea::placeholder {
+    color: #8a9aad !important;
+  }
+}
