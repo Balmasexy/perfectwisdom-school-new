@@ -4922,3 +4922,800 @@ body {
   }
 }
 
+
+/* =========================================================
+   STUDENT PROFILE — PROFESSIONAL RECORD WORKSPACE
+   ========================================================= */
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 14px;
+  padding: 8px 11px;
+  border: 1px solid #d7e3ef;
+  border-radius: 9px;
+  background: #fff;
+  color: #1457a6;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.back-link:hover {
+  background: #eef5ff;
+}
+
+.student-profile-tabs {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  margin-bottom: 17px;
+  padding: 6px;
+  border: 1px solid #dce6f1;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 5px 18px rgba(6,43,92,.045);
+}
+
+.student-profile-tabs button {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 39px;
+  padding: 0 13px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.student-profile-tabs button:first-child,
+.student-profile-tabs button:hover {
+  border-color: #d6e5f5;
+  background: #eef5ff;
+  color: #1457a6;
+}
+
+.student-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.student-profile-grid > .module-panel {
+  min-width: 0;
+}
+
+.student-profile-grid > .module-panel:nth-child(3),
+.student-profile-grid > .module-panel:nth-child(4),
+.student-profile-grid > .module-panel:nth-child(5) {
+  grid-column: 1 / -1;
+}
+
+.student-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  padding: 4px 20px 20px;
+}
+
+.student-detail-grid > div {
+  min-width: 0;
+  padding: 14px 12px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.student-detail-grid > div:nth-child(odd) {
+  border-right: 1px solid #edf2f7;
+}
+
+.student-detail-grid > div.full-width {
+  grid-column: 1 / -1;
+  border-right: 0;
+}
+
+.student-detail-grid span {
+  display: block;
+  margin-bottom: 5px;
+  color: #8493a5;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.student-detail-grid strong {
+  display: block;
+  overflow-wrap: anywhere;
+  color: #163653;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.student-class-assignment {
+  margin: 0 20px 20px;
+  padding: 17px;
+  border: 1px solid #dce8f3;
+  border-radius: 13px;
+  background: #f7faff;
+}
+
+.student-class-assignment > div:first-child strong {
+  color: #062b5c;
+  font-size: 13px;
+}
+
+.student-class-assignment p {
+  margin-top: 4px;
+  color: #718198;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.student-class-assignment-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 9px;
+  margin-top: 13px;
+}
+
+.student-class-assignment select {
+  min-height: 43px;
+  width: 100%;
+  padding: 0 11px;
+  border: 1px solid #ccd9e7;
+  border-radius: 10px;
+  background: #fff;
+  color: #173752;
+  font-size: 12px;
+  outline: none;
+}
+
+.student-class-assignment select:focus {
+  border-color: #1457a6;
+  box-shadow: 0 0 0 3px rgba(20,87,166,.09);
+}
+
+.module-success {
+  margin-top: 11px;
+  padding: 10px 12px;
+  border: 1px solid #b9e5c9;
+  border-radius: 9px;
+  background: #effaf3;
+  color: #147a45;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.profile-empty-links {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  padding: 20px;
+}
+
+.profile-empty-links > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 105px;
+  padding: 14px;
+  border: 1px solid #e0e8f1;
+  border-radius: 12px;
+  background: #f9fbfd;
+  transition: transform .16s ease, border-color .16s ease, background .16s ease;
+}
+
+.profile-empty-links > div:hover {
+  transform: translateY(-2px);
+  border-color: #bcd3ea;
+  background: #f2f7fd;
+}
+
+.profile-empty-links svg {
+  color: #1457a6;
+}
+
+.profile-empty-links span {
+  color: #5d7188;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.profile-empty-links strong {
+  margin-top: auto;
+  color: #1457a6;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+/* =========================================================
+   JAMB — REGISTRATION CENTRE DESIGN
+   ========================================================= */
+
+.registration-workspace {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(20,87,166,.06), transparent 30%),
+    #f4f7fb;
+}
+
+.dashboard-welcome {
+  position: relative;
+  overflow: hidden;
+  padding: 27px 29px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #062b5c 0%, #1457a6 70%, #1d6fd1 100%);
+  color: #fff;
+  box-shadow: 0 14px 35px rgba(6,43,92,.16);
+}
+
+.dashboard-welcome::after {
+  content: "JAMB";
+  position: absolute;
+  right: 20px;
+  bottom: -27px;
+  color: rgba(255,255,255,.06);
+  font-size: 100px;
+  font-weight: 950;
+  letter-spacing: -7px;
+}
+
+.section-kicker {
+  display: inline-block;
+  color: #f5b45f;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .14em;
+}
+
+.dashboard-welcome h1 {
+  position: relative;
+  z-index: 1;
+  margin: 7px 0 7px;
+  color: #fff;
+  font-size: clamp(27px, 4vw, 39px);
+  font-weight: 900;
+  letter-spacing: -.9px;
+}
+
+.dashboard-welcome p {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  color: rgba(255,255,255,.78);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.management-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 14px 0;
+  padding: 13px 15px;
+  border: 1px solid #f0d79b;
+  border-radius: 12px;
+  background: #fffaf0;
+  color: #76520b;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.management-note svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.management-error,
+.management-success {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 13px 0;
+  padding: 12px 14px;
+  border-radius: 11px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.management-error {
+  border: 1px solid #f0c7c3;
+  background: #fff4f3;
+  color: #b42318;
+}
+
+.management-success {
+  border: 1px solid #b9e5c9;
+  background: #effaf3;
+  color: #147a45;
+}
+
+.registration-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 11px;
+  margin: 15px 0;
+}
+
+.registration-tab {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 75px;
+  padding: 13px 16px;
+  border: 1px solid #dbe5ef;
+  border-radius: 14px;
+  background: #fff;
+  color: #64748b;
+  text-align: left;
+  box-shadow: 0 6px 18px rgba(6,43,92,.04);
+}
+
+.registration-tab svg {
+  flex: 0 0 auto;
+  color: #1457a6;
+}
+
+.registration-tab span {
+  display: grid;
+  gap: 4px;
+}
+
+.registration-tab strong {
+  color: #173752;
+  font-size: 12px;
+}
+
+.registration-tab small {
+  color: #8795a7;
+  font-size: 10px;
+}
+
+.registration-tab.active {
+  border-color: #1457a6;
+  background: #eef5ff;
+  box-shadow: 0 8px 22px rgba(20,87,166,.1);
+}
+
+.registration-tab.active strong {
+  color: #062b5c;
+}
+
+.management-stats {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 13px;
+  margin-bottom: 15px;
+}
+
+.management-stats > div {
+  position: relative;
+  overflow: hidden;
+  padding: 18px 20px !important;
+  border: 1px solid #dce6f1;
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 7px 22px rgba(6,43,92,.05);
+}
+
+.management-stats > div::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: #1457a6;
+}
+
+.management-stats > div:nth-child(2)::before {
+  background: #15803d;
+}
+
+.management-stats > div:nth-child(3)::before {
+  background: #f28c18;
+}
+
+.management-stats span {
+  color: #75869a;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.management-stats strong {
+  display: block;
+  margin-top: 5px;
+  color: #062b5c;
+  font-size: 28px;
+}
+
+.management-form,
+.management-card {
+  overflow: hidden;
+  margin-bottom: 16px;
+  border: 1px solid #dce6f1;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 27px rgba(6,43,92,.05);
+}
+
+.management-form-header,
+.management-card-header {
+  padding: 22px 24px;
+  border-bottom: 1px solid #e5edf5;
+  background: linear-gradient(180deg, #fff, #f8fbff);
+}
+
+.management-form-header h2,
+.management-card-header h2 {
+  margin: 5px 0 4px;
+  color: #062b5c;
+  font-size: 19px;
+  font-weight: 900;
+}
+
+.management-form-header p,
+.management-card-header p {
+  color: #75869a;
+  font-size: 11px;
+}
+
+.management-form-section {
+  padding: 23px 24px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.management-form-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 17px;
+  color: #173752;
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.management-form-section h3 svg {
+  color: #1457a6;
+}
+
+.management-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 15px;
+}
+
+.management-form-grid label {
+  display: grid;
+  gap: 7px;
+  color: #435a72;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+
+.management-form-grid input,
+.management-form-grid select,
+.management-form-grid textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 43px;
+  padding: 9px 11px;
+  border: 1px solid #ccd9e7;
+  border-radius: 10px;
+  outline: none;
+  background: #fbfdff;
+  color: #173752;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: none;
+}
+
+.management-form-grid textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.management-form-grid input:focus,
+.management-form-grid select:focus,
+.management-form-grid textarea:focus {
+  border-color: #1457a6;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(20,87,166,.09);
+}
+
+.management-form-full {
+  grid-column: 1 / -1;
+}
+
+.management-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 17px 24px;
+  background: #f8fbff;
+}
+
+.management-primary-button {
+  min-height: 43px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 10px;
+  background: #1457a6;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 850;
+  box-shadow: 0 7px 17px rgba(20,87,166,.18);
+}
+
+.management-primary-button:hover:not(:disabled) {
+  background: #0a3670;
+  transform: translateY(-1px);
+}
+
+.management-primary-button:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+.management-toolbar {
+  display: flex;
+  padding: 14px 18px;
+  border-bottom: 1px solid #edf2f7;
+  background: #fbfdff;
+}
+
+.management-search {
+  width: min(520px,100%);
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid #d3dfeb;
+  border-radius: 10px;
+  background: #fff;
+  color: #8291a5;
+}
+
+.management-search:focus-within {
+  border-color: #1457a6;
+  box-shadow: 0 0 0 3px rgba(20,87,166,.08);
+}
+
+.management-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #173752;
+  font-size: 12px;
+}
+
+.management-table-wrap {
+  overflow-x: auto;
+}
+
+.management-table {
+  width: 100%;
+  min-width: 850px;
+  border-collapse: collapse;
+}
+
+.management-table th {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e4ecf4;
+  background: #f7faff;
+  color: #61738a;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.management-table td {
+  padding: 13px 15px;
+  border-bottom: 1px solid #edf2f7;
+  color: #53677d;
+  font-size: 11px;
+  vertical-align: middle;
+}
+
+.management-table tbody tr:hover {
+  background: #f7faff;
+}
+
+.management-table td strong {
+  display: block;
+  color: #173752;
+}
+
+.management-table td span {
+  display: block;
+  margin-top: 2px;
+}
+
+.management-table td small {
+  display: block;
+  margin-top: 3px;
+  color: #8997a8;
+  font-size: 9px;
+}
+
+.management-badge {
+  display: inline-flex !important;
+  align-items: center;
+  width: max-content;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #1457a6 !important;
+  font-size: 9px !important;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.passport-profile-card {
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+  padding: 45px 25px;
+  border: 1px solid #dce6f1;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 27px rgba(6,43,92,.05);
+  text-align: center;
+}
+
+.passport-profile-icon {
+  display: grid;
+  place-items: center;
+  width: 70px;
+  height: 70px;
+  margin-bottom: 4px;
+  border-radius: 18px;
+  background: #eef5ff;
+  color: #1457a6;
+}
+
+.passport-profile-card h2 {
+  margin: 3px 0;
+  color: #062b5c;
+  font-size: 21px;
+  font-weight: 900;
+}
+
+.passport-profile-card > p {
+  max-width: 580px;
+  color: #718198;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.passport-upload-box {
+  width: min(480px,100%);
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin: 15px 0;
+  padding: 25px;
+  border: 1px dashed #b9cde0;
+  border-radius: 15px;
+  background: #f8fbff;
+  color: #718198;
+}
+
+.passport-upload-box svg {
+  color: #1457a6;
+}
+
+.passport-upload-box strong {
+  color: #173752;
+  font-size: 13px;
+}
+
+.passport-upload-box span {
+  margin-bottom: 5px;
+  font-size: 11px;
+}
+
+/* ---------- PROFILE/JAMB MOBILE ---------- */
+
+@media (max-width: 900px) {
+  .student-profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .student-profile-grid > .module-panel:nth-child(n) {
+    grid-column: auto;
+  }
+
+  .profile-empty-links {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+
+  .registration-workspace {
+    padding: 14px;
+  }
+}
+
+@media (max-width: 620px) {
+  .module-workspace,
+  .registration-workspace {
+    padding: 10px;
+  }
+
+  .student-profile-tabs {
+    margin-bottom: 11px;
+  }
+
+  .student-detail-grid {
+    grid-template-columns: 1fr;
+    padding: 3px 14px 14px;
+  }
+
+  .student-detail-grid > div,
+  .student-detail-grid > div:nth-child(odd),
+  .student-detail-grid > div.full-width {
+    border-right: 0;
+  }
+
+  .student-class-assignment {
+    margin: 0 14px 14px;
+  }
+
+  .student-class-assignment-row {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-empty-links {
+    grid-template-columns: 1fr;
+    padding: 14px;
+  }
+
+  .dashboard-welcome {
+    padding: 21px;
+    border-radius: 16px;
+  }
+
+  .dashboard-welcome h1 {
+    font-size: 27px;
+  }
+
+  .registration-tabs,
+  .management-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .management-form-header,
+  .management-card-header,
+  .management-form-section {
+    padding: 18px;
+  }
+
+  .management-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .management-form-full {
+    grid-column: auto;
+  }
+
+  .management-form-actions {
+    padding: 14px 18px;
+  }
+
+  .management-primary-button {
+    width: 100%;
+  }
+}
