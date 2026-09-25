@@ -7799,3 +7799,53 @@ body {
     width: 100% !important;
   }
 }
+
+
+/* PWS — ATTENDANCE WORKSPACE */
+.attendance-workspace{max-width:1180px;margin:0 auto;padding:8px 0 40px}
+.attendance-hero{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:26px;border-radius:20px;background:linear-gradient(135deg,#062b5c,#1457a6);color:#fff;box-shadow:0 12px 30px rgba(6,43,92,.16)}
+.attendance-hero h1{margin:5px 0 6px;font-size:28px;font-weight:900}
+.attendance-hero p{margin:0;color:#dbeafe}
+.attendance-date-card{display:flex;align-items:center;gap:9px;padding:12px 15px;border-radius:12px;background:rgba(255,255,255,.12);font-weight:800;white-space:nowrap}
+.attendance-nav{display:flex;gap:8px;overflow:auto;margin:18px 0;padding:5px;background:#eef3f8;border-radius:14px}
+.attendance-nav button{border:0;background:transparent;padding:11px 16px;border-radius:10px;font-weight:800;color:#52657a;white-space:nowrap;cursor:pointer}
+.attendance-nav button.active{background:#fff;color:#062b5c;box-shadow:0 3px 10px rgba(15,23,42,.08)}
+.attendance-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.attendance-summary>div{background:#fff;border:1px solid #dce6f1;border-radius:16px;padding:18px;box-shadow:0 5px 16px rgba(15,23,42,.05)}
+.attendance-summary span,.attendance-summary small{display:block;color:#64748b}
+.attendance-summary strong{display:block;margin:5px 0;font-size:26px;color:#062b5c}
+.attendance-panel{background:#fff;border:1px solid #dce6f1;border-radius:20px;padding:24px;box-shadow:0 7px 22px rgba(15,23,42,.05)}
+.attendance-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:20px}
+.attendance-panel-heading h2{margin:3px 0;font-size:22px;font-weight:900;color:#102a43}
+.attendance-panel-heading p{margin:0;color:#64748b}
+.attendance-kicker{font-size:11px;font-weight:900;letter-spacing:.12em;color:#1457a6}
+.attendance-save-button,.attendance-secondary-button{border:0;border-radius:11px;padding:11px 17px;font-weight:800;cursor:pointer}
+.attendance-save-button{background:#15803d;color:#fff}
+.attendance-secondary-button{background:#eaf1f8;color:#1457a6}
+.attendance-success{display:flex;align-items:center;gap:8px;padding:11px 14px;margin-bottom:16px;border-radius:11px;background:#ecfdf3;color:#166534;font-weight:700}
+.attendance-filters{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:end;margin-bottom:20px}
+.attendance-filters label{display:grid;gap:6px;font-size:12px;font-weight:800;color:#334155}
+.attendance-filters input,.attendance-filters select{width:100%;min-height:44px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;padding:9px 11px;color:#102a43}
+.attendance-table-wrap{overflow:auto}
+.attendance-table{width:100%;border-collapse:collapse}
+.attendance-table th,.attendance-table td{text-align:left;padding:13px;border-bottom:1px solid #e5e7eb}
+.attendance-table th{background:#f8fafc;color:#64748b;font-size:12px;text-transform:uppercase}
+.attendance-table select{border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px}
+.attendance-empty{text-align:center;padding:42px 20px;border:1px dashed #cbd5e1;border-radius:15px;color:#64748b}
+.attendance-empty svg{margin:0 auto 10px;color:#1457a6}
+.attendance-empty h3{margin:0 0 5px;color:#102a43;font-weight:900}
+.attendance-empty p{margin:0}
+.attendance-today-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.attendance-today-grid div{padding:18px;border-radius:14px;background:#f4f7fb;text-align:center}
+.attendance-today-grid strong{display:block;font-size:27px;color:#062b5c}
+.attendance-today-grid span{color:#64748b;font-size:13px}
+@media(max-width:760px){
+  .attendance-hero{display:block;padding:20px}
+  .attendance-date-card{margin-top:15px;width:max-content}
+  .attendance-summary,.attendance-today-grid{grid-template-columns:repeat(2,1fr)}
+  .attendance-panel{padding:17px}
+  .attendance-panel-heading{display:block}
+  .attendance-panel-heading .attendance-save-button{margin-top:14px;width:100%}
+  .attendance-filters{grid-template-columns:1fr}
+  .attendance-hero h1{font-size:23px}
+}
