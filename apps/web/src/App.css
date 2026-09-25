@@ -4222,3 +4222,703 @@ body {
   }
 }
 
+
+/* =========================================================
+   PERFECT WISDOM SCHOOL — ACADEMIC MANAGEMENT UI 2026
+   Shared visual system: Students / WAEC / NECO / Management
+   ========================================================= */
+
+:root {
+  --pws-navy: #062b5c;
+  --pws-blue: #1457a6;
+  --pws-blue-2: #1d6fd1;
+  --pws-gold: #f28c18;
+  --pws-green: #15803d;
+  --pws-red: #b42318;
+  --pws-ink: #102a43;
+  --pws-muted: #64748b;
+  --pws-bg: #f4f7fb;
+  --pws-line: #dce6f1;
+}
+
+/* ---------- MODULE FOUNDATION ---------- */
+
+.module-workspace {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px;
+  color: var(--pws-ink);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(20,87,166,.06), transparent 30%),
+    var(--pws-bg);
+}
+
+.module-header {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 26px 28px;
+  margin-bottom: 18px;
+  border: 1px solid #d7e4f1;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #062b5c 0%, #1457a6 72%, #1d6fd1 100%);
+  box-shadow: 0 14px 36px rgba(6,43,92,.16);
+  color: #fff;
+}
+
+.module-header::after {
+  content: "";
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  right: -90px;
+  top: -110px;
+  border-radius: 50%;
+  background: rgba(242,140,24,.16);
+}
+
+.module-title {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.module-title h1 {
+  margin: 3px 0 5px;
+  color: #fff;
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 850;
+  letter-spacing: -.8px;
+}
+
+.module-title p {
+  max-width: 720px;
+  color: rgba(255,255,255,.78);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.module-eyebrow {
+  color: #f7b35d;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.module-icon {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 15px;
+  background: rgba(255,255,255,.11);
+  color: #fff;
+}
+
+.module-action,
+.module-refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  border-radius: 11px;
+  font-size: 13px;
+  font-weight: 800;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.module-action {
+  position: relative;
+  z-index: 2;
+  border: 1px solid rgba(255,255,255,.22);
+  padding: 0 16px;
+  background: var(--pws-gold);
+  color: #fff;
+  box-shadow: 0 7px 18px rgba(0,0,0,.14);
+}
+
+.module-action:hover {
+  transform: translateY(-1px);
+  background: #dc7410;
+}
+
+.module-refresh {
+  border: 1px solid var(--pws-line);
+  padding: 0 13px;
+  background: #fff;
+  color: var(--pws-blue);
+}
+
+.module-refresh:hover {
+  background: #eef5ff;
+}
+
+/* ---------- STUDENT SUMMARY CARDS ---------- */
+
+.module-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.module-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 124px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 18px;
+  border: 1px solid var(--pws-line);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 7px 22px rgba(6,43,92,.055);
+}
+
+.module-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--pws-blue);
+}
+
+.module-card:nth-child(2)::before { background: var(--pws-green); }
+.module-card:nth-child(3)::before { background: var(--pws-gold); }
+.module-card:nth-child(4)::before { background: var(--pws-red); }
+
+.module-card svg {
+  margin-bottom: 10px;
+  color: var(--pws-blue);
+}
+
+.module-card:nth-child(2) svg { color: var(--pws-green); }
+.module-card:nth-child(3) svg { color: var(--pws-gold); }
+.module-card:nth-child(4) svg { color: var(--pws-red); }
+
+.module-card span {
+  color: var(--pws-muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.module-card strong {
+  margin: 3px 0 1px;
+  color: var(--pws-navy);
+  font-size: 27px;
+  line-height: 1.1;
+}
+
+.module-card small {
+  color: #8291a5;
+  font-size: 11px;
+}
+
+/* ---------- MANAGEMENT PANELS ---------- */
+
+.module-panel {
+  overflow: hidden;
+  border: 1px solid var(--pws-line);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 9px 28px rgba(6,43,92,.055);
+}
+
+.module-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 22px;
+  border-bottom: 1px solid #e8eef5;
+}
+
+.module-panel-heading h2 {
+  margin: 0;
+  color: var(--pws-navy);
+  font-size: 18px;
+  font-weight: 850;
+}
+
+.module-panel-heading p {
+  margin-top: 4px;
+  color: var(--pws-muted);
+  font-size: 12px;
+}
+
+/* ---------- STUDENT SEARCH ---------- */
+
+.student-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 190px;
+  gap: 10px;
+  padding: 15px 18px;
+  border-bottom: 1px solid #edf2f7;
+  background: #fbfdff;
+}
+
+.student-search {
+  min-height: 43px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px;
+  border: 1px solid #d3dfeb;
+  border-radius: 10px;
+  background: #fff;
+  color: #7a8a9f;
+}
+
+.student-search:focus-within {
+  border-color: var(--pws-blue);
+  box-shadow: 0 0 0 3px rgba(20,87,166,.09);
+}
+
+.student-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--pws-ink);
+  font-size: 13px;
+}
+
+.student-toolbar select {
+  min-height: 43px;
+  padding: 0 11px;
+  border: 1px solid #d3dfeb;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--pws-ink);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+/* ---------- STUDENT TABLE ---------- */
+
+.student-table-wrap {
+  overflow-x: auto;
+}
+
+.student-table {
+  width: 100%;
+  min-width: 850px;
+  border-collapse: collapse;
+}
+
+.student-table th {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5edf5;
+  background: #f7faff;
+  color: #61738a;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .07em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.student-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #edf2f7;
+  color: #43566d;
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.student-table tbody tr {
+  cursor: pointer;
+  transition: background .16s ease;
+}
+
+.student-table tbody tr:hover {
+  background: #f5f9ff;
+}
+
+.student-table td strong {
+  display: block;
+  color: var(--pws-navy);
+}
+
+.student-table td small {
+  display: block;
+  margin-top: 3px;
+  color: #8291a5;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 25px;
+  padding: 0 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.status-pill.active { background: #e7f7ed; color: #147a45; }
+.status-pill.inactive { background: #fff5df; color: #9a6700; }
+.status-pill.suspended { background: #fff0ef; color: #b42318; }
+
+/* ---------- STATES / MODALS ---------- */
+
+.module-error {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border: 1px solid #f0c7c3;
+  border-radius: 11px;
+  background: #fff5f4;
+  color: var(--pws-red);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.module-placeholder {
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  padding: 60px 20px;
+  color: #8a99ab;
+  text-align: center;
+}
+
+.module-placeholder h3 {
+  margin: 4px 0 0;
+  color: var(--pws-navy);
+  font-size: 16px;
+}
+
+.module-placeholder p {
+  color: var(--pws-muted);
+  font-size: 12px;
+}
+
+.modal-backdrop {
+  background: rgba(3,20,42,.68);
+  backdrop-filter: blur(5px);
+}
+
+.student-modal {
+  border: 1px solid #d8e4ef;
+  border-radius: 20px;
+  box-shadow: 0 30px 90px rgba(2,25,55,.3);
+}
+
+.student-modal-header {
+  background: linear-gradient(180deg, #fff, #f7faff);
+  border-bottom: 1px solid #e4ecf4;
+}
+
+.student-modal-header h2 {
+  color: var(--pws-navy);
+  font-weight: 850;
+}
+
+.student-form-grid label {
+  color: #31465e;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.student-form-grid input,
+.student-form-grid select,
+.student-form-grid textarea {
+  border-color: #ccd9e7;
+  background: #fbfdff;
+  border-radius: 10px;
+}
+
+.student-form-grid input:focus,
+.student-form-grid select:focus,
+.student-form-grid textarea:focus {
+  border-color: var(--pws-blue);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(20,87,166,.09);
+}
+
+.icon-button {
+  border-color: #d4e0ec;
+  background: #fff;
+  color: #60748a;
+}
+
+.icon-button:hover {
+  border-color: var(--pws-gold);
+  color: var(--pws-navy);
+  background: #fff8ef;
+}
+
+/* =========================================================
+   WAEC / NECO REGISTRATION CENTRE
+   ========================================================= */
+
+.exam-registration-shell {
+  min-height: 100%;
+  padding: 22px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(20,87,166,.07), transparent 28%),
+    var(--pws-bg);
+}
+
+.exam-container {
+  width: min(1400px, 100%);
+  margin: 0 auto;
+}
+
+.exam-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 28px;
+  border-radius: 20px;
+  color: #fff;
+  background: linear-gradient(135deg, #062b5c, #1457a6 68%, #1d6fd1);
+  box-shadow: 0 15px 38px rgba(6,43,92,.18);
+}
+
+.exam-waec .exam-hero {
+  background: linear-gradient(135deg, #062b5c, #1457a6 70%, #2b79d0);
+}
+
+.exam-neco .exam-hero {
+  background: linear-gradient(135deg, #064e3b, #15803d 70%, #22a06b);
+}
+
+.exam-notice {
+  margin: 15px 0;
+  padding: 13px 15px;
+  border: 1px solid #f0d79b;
+  border-radius: 12px;
+  background: #fffaf0;
+  color: #76520b;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.exam-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 13px;
+  margin: 15px 0;
+}
+
+.exam-summary-card {
+  padding: 18px;
+  border: 1px solid var(--pws-line);
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 7px 22px rgba(6,43,92,.05);
+}
+
+.exam-summary-card strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--pws-navy);
+  font-size: 26px;
+}
+
+.exam-workspace {
+  overflow: hidden;
+  border: 1px solid var(--pws-line);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 9px 28px rgba(6,43,92,.055);
+}
+
+.exam-steps {
+  padding: 14px;
+  border-bottom: 1px solid #e5edf5;
+  background: #f8fbff;
+}
+
+.exam-step {
+  border: 1px solid #dce6f1 !important;
+  background: #fff !important;
+  color: #61738a !important;
+}
+
+.exam-step-active {
+  border-color: var(--pws-blue) !important;
+  background: var(--pws-blue) !important;
+  color: #fff !important;
+  box-shadow: 0 7px 18px rgba(20,87,166,.18);
+}
+
+.exam-step-complete {
+  border-color: #b9e5c9 !important;
+  background: #eefaf2 !important;
+  color: #147a45 !important;
+}
+
+.exam-section {
+  padding: 26px;
+}
+
+.exam-section-title {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e8eef5;
+}
+
+.exam-section-title h2 {
+  color: var(--pws-navy);
+  font-weight: 850;
+}
+
+.exam-field label {
+  color: #31465e;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.exam-field input,
+.exam-field select,
+.exam-field textarea {
+  border: 1px solid #ccd9e7 !important;
+  border-radius: 10px !important;
+  background: #fbfdff !important;
+}
+
+.exam-field input:focus,
+.exam-field select:focus,
+.exam-field textarea:focus {
+  border-color: var(--pws-blue) !important;
+  box-shadow: 0 0 0 3px rgba(20,87,166,.09) !important;
+}
+
+.exam-subject {
+  border: 1px solid #dce6f1 !important;
+  border-radius: 11px !important;
+  background: #fff !important;
+}
+
+.exam-subject-selected {
+  border-color: var(--pws-blue) !important;
+  background: #eef5ff !important;
+  box-shadow: inset 0 0 0 1px rgba(20,87,166,.12);
+}
+
+.exam-table-wrap {
+  overflow-x: auto;
+  padding: 0 26px 26px;
+}
+
+.exam-table {
+  width: 100%;
+  min-width: 1050px;
+  border-collapse: collapse;
+}
+
+.exam-table th {
+  padding: 12px;
+  background: #f7faff;
+  color: #61738a;
+  font-size: 10px;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.exam-table td {
+  padding: 13px 12px;
+  border-top: 1px solid #edf2f7;
+  color: #43566d;
+  font-size: 12px;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media (max-width: 900px) {
+  .module-workspace,
+  .exam-registration-shell {
+    padding: 14px;
+  }
+
+  .module-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .module-action {
+    width: 100%;
+  }
+
+  .module-cards {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+
+  .student-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .exam-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .module-workspace,
+  .exam-registration-shell {
+    padding: 10px;
+  }
+
+  .module-header {
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  .module-title {
+    align-items: flex-start;
+  }
+
+  .module-title h1 {
+    font-size: 24px;
+  }
+
+  .module-cards {
+    gap: 9px;
+  }
+
+  .module-card {
+    min-height: 110px;
+    padding: 14px;
+  }
+
+  .module-card strong {
+    font-size: 23px;
+  }
+
+  .module-panel-heading {
+    padding: 16px;
+  }
+
+  .exam-hero,
+  .exam-section {
+    padding: 20px;
+  }
+
+  .exam-steps {
+    padding: 10px;
+  }
+
+  .exam-table-wrap {
+    padding: 0 15px 18px;
+  }
+}
+

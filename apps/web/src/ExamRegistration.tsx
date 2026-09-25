@@ -467,11 +467,11 @@ export default function ExamRegistration({
   }
 
   return (
-    <div className="min-h-full bg-slate-50 p-2 md:p-5">
-      <div className="mx-auto max-w-7xl space-y-5">
+    <div className={`exam-registration-shell exam-${examType.toLowerCase()}`}>
+      <div className="exam-container">
 
         {/* HEADER */}
-        <header className="overflow-hidden rounded-3xl bg-gradient-to-br from-green-800 via-green-700 to-emerald-600 p-6 text-white shadow-lg">
+        <header className="exam-hero">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-green-100">
@@ -503,15 +503,15 @@ export default function ExamRegistration({
         </header>
 
         {/* NOTICE */}
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+        <div className="exam-notice">
           <strong>Important:</strong> This is an internal PWS workflow for
           recording and managing candidate registration information. It is
           not a direct official {examType} API or official examination portal.
         </div>
 
         {/* SUMMARY */}
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
+        <div className="exam-summary">
+          <div className="exam-summary-card">
             <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
               Candidates
             </p>
@@ -520,7 +520,7 @@ export default function ExamRegistration({
             </p>
           </div>
 
-          <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
+          <div className="exam-summary-card">
             <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
               Completed
             </p>
@@ -529,7 +529,7 @@ export default function ExamRegistration({
             </p>
           </div>
 
-          <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
+          <div className="exam-summary-card">
             <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
               Recorded Payments
             </p>
@@ -555,10 +555,10 @@ export default function ExamRegistration({
         )}
 
         {/* REGISTRATION WORKSPACE */}
-        <form onSubmit={submitRegistration} className="rounded-3xl bg-white shadow-sm ring-1 ring-slate-100">
+        <form onSubmit={submitRegistration} className="exam-workspace">
 
           {/* STEPS */}
-          <div className="border-b border-slate-100 p-4 md:p-6">
+          <div className="exam-steps">
             <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
               {steps.map((item) => {
                 const Icon = item.icon
@@ -570,11 +570,11 @@ export default function ExamRegistration({
                     key={item.id}
                     type="button"
                     onClick={() => setStep(item.id)}
-                    className={`rounded-2xl p-3 text-left transition ${
+                    className={`exam-step rounded-2xl p-3 text-left transition ${
                       active
-                        ? 'bg-green-700 text-white shadow-sm'
+                        ? 'exam-step-active bg-green-700 text-white shadow-sm'
                         : completed
-                          ? 'bg-green-50 text-green-800'
+                          ? 'exam-step-complete bg-green-50 text-green-800'
                           : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
                     }`}
                   >
@@ -608,8 +608,8 @@ export default function ExamRegistration({
 
           {/* STEP 1 */}
           {step === 1 && (
-            <div className="p-5 md:p-7">
-              <div className="mb-6">
+            <div className="exam-section">
+              <div className="exam-section-title">
                 <p className="text-xs font-bold uppercase tracking-wider text-green-700">
                   Step 1
                 </p>
@@ -624,7 +624,7 @@ export default function ExamRegistration({
 
               <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
                 <div className="md:col-span-2">
-            <label className={labelClass}>
+            <label className={`exam-field ${labelClass}`}>
               Search Existing Student
             </label>
 
@@ -758,7 +758,7 @@ export default function ExamRegistration({
           </div>
 
                 <div>
-                  <label className={labelClass}>First Name *</label>
+                  <label className={`exam-field ${labelClass}`}>First Name *</label>
                   <input
                     required
                     className={inputClass}
@@ -768,7 +768,7 @@ export default function ExamRegistration({
                 </div>
 
                 <div>
-                  <label className={labelClass}>Last Name *</label>
+                  <label className={`exam-field ${labelClass}`}>Last Name *</label>
                   <input
                     required
                     className={inputClass}
@@ -778,7 +778,7 @@ export default function ExamRegistration({
                 </div>
 
                 <div>
-                  <label className={labelClass}>Other Name</label>
+                  <label className={`exam-field ${labelClass}`}>Other Name</label>
                   <input
                     className={inputClass}
                     value={form.otherName}
@@ -787,7 +787,7 @@ export default function ExamRegistration({
                 </div>
 
                 <div>
-                  <label className={labelClass}>Phone Number *</label>
+                  <label className={`exam-field ${labelClass}`}>Phone Number *</label>
                   <input
                     required
                     className={inputClass}
@@ -797,7 +797,7 @@ export default function ExamRegistration({
                 </div>
 
                 <div>
-                  <label className={labelClass}>Email Address</label>
+                  <label className={`exam-field ${labelClass}`}>Email Address</label>
                   <input
                     type="email"
                     className={inputClass}
@@ -807,7 +807,7 @@ export default function ExamRegistration({
                 </div>
 
                 <div>
-                  <label className={labelClass}>Date of Birth</label>
+                  <label className={`exam-field ${labelClass}`}>Date of Birth</label>
                   <input
                     type="date"
                     className={inputClass}
@@ -817,7 +817,7 @@ export default function ExamRegistration({
                 </div>
 
                 <div>
-                  <label className={labelClass}>Gender</label>
+                  <label className={`exam-field ${labelClass}`}>Gender</label>
                   <select
                     className={inputClass}
                     value={form.gender}
@@ -831,7 +831,7 @@ export default function ExamRegistration({
                 </div>
 
                 <div>
-                  <label className={labelClass}>State of Origin</label>
+                  <label className={`exam-field ${labelClass}`}>State of Origin</label>
                   <input
                     className={inputClass}
                     value={form.stateOfOrigin}
@@ -840,7 +840,7 @@ export default function ExamRegistration({
                 </div>
 
                 <div>
-                  <label className={labelClass}>Local Government Area</label>
+                  <label className={`exam-field ${labelClass}`}>Local Government Area</label>
                   <input
                     className={inputClass}
                     value={form.lga}
@@ -849,7 +849,7 @@ export default function ExamRegistration({
                 </div>
 
                 <div>
-                  <label className={labelClass}>NIN Last 4 Digits</label>
+                  <label className={`exam-field ${labelClass}`}>NIN Last 4 Digits</label>
                   <input
                     inputMode="numeric"
                     maxLength={4}
@@ -866,7 +866,7 @@ export default function ExamRegistration({
                 </div>
 
                 <div>
-                  <label className={labelClass}>PWS Branch</label>
+                  <label className={`exam-field ${labelClass}`}>PWS Branch</label>
                   <select
                     className={inputClass}
                     value={form.branchId}
@@ -897,8 +897,8 @@ export default function ExamRegistration({
 
           {/* STEP 2 */}
           {step === 2 && (
-            <div className="p-5 md:p-7">
-              <div className="mb-6">
+            <div className="exam-section">
+              <div className="exam-section-title">
                 <p className="text-xs font-bold uppercase tracking-wider text-green-700">
                   Step 2
                 </p>
@@ -913,7 +913,7 @@ export default function ExamRegistration({
 
               <div className="grid gap-5 md:grid-cols-3">
                 <div>
-                  <label className={labelClass}>Examination Year *</label>
+                  <label className={`exam-field ${labelClass}`}>Examination Year *</label>
                   <input
                     required
                     type="number"
@@ -926,7 +926,7 @@ export default function ExamRegistration({
                 </div>
 
                 <div>
-                  <label className={labelClass}>Registration Type *</label>
+                  <label className={`exam-field ${labelClass}`}>Registration Type *</label>
                   <select
                     className={inputClass}
                     value={form.registrationType}
@@ -940,7 +940,7 @@ export default function ExamRegistration({
                 </div>
 
                 <div>
-                  <label className={labelClass}>Examination Centre</label>
+                  <label className={`exam-field ${labelClass}`}>Examination Centre</label>
                   <input
                     className={inputClass}
                     value={form.examinationCentre}
@@ -1020,8 +1020,8 @@ export default function ExamRegistration({
 
           {/* STEP 3 */}
           {step === 3 && (
-            <div className="p-5 md:p-7">
-              <div className="mb-6">
+            <div className="exam-section">
+              <div className="exam-section-title">
                 <p className="text-xs font-bold uppercase tracking-wider text-green-700">
                   Step 3
                 </p>
@@ -1052,7 +1052,7 @@ export default function ExamRegistration({
                 </div>
 
                 <div>
-                  <label className={labelClass}>Passport Photograph</label>
+                  <label className={`exam-field ${labelClass}`}>Passport Photograph</label>
 
                   <input
                     type="file"
@@ -1102,8 +1102,8 @@ export default function ExamRegistration({
 
           {/* STEP 4 */}
           {step === 4 && (
-            <div className="p-5 md:p-7">
-              <div className="mb-6">
+            <div className="exam-section">
+              <div className="exam-section-title">
                 <p className="text-xs font-bold uppercase tracking-wider text-green-700">
                   Step 4
                 </p>
@@ -1118,7 +1118,7 @@ export default function ExamRegistration({
 
               <div className="grid gap-5 md:grid-cols-2">
                 <div>
-                  <label className={labelClass}>Registration Amount</label>
+                  <label className={`exam-field ${labelClass}`}>Registration Amount</label>
                   <input
                     type="number"
                     min="0"
@@ -1131,7 +1131,7 @@ export default function ExamRegistration({
                 </div>
 
                 <div>
-                  <label className={labelClass}>Payment Reference</label>
+                  <label className={`exam-field ${labelClass}`}>Payment Reference</label>
                   <input
                     className={inputClass}
                     value={form.paymentReference}
@@ -1143,7 +1143,7 @@ export default function ExamRegistration({
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className={labelClass}>Registration Notes</label>
+                  <label className={`exam-field ${labelClass}`}>Registration Notes</label>
                   <textarea
                     rows={4}
                     className={inputClass}
