@@ -341,7 +341,7 @@ export async function settingsRoutes(app: FastifyInstance) {
     return result.rows[0]
   })
 
-  app.patch('/students/:id/passport', adminOnly, async (request, reply) => {
+  app.patch('/students/:id/passport', { preHandler: requireRoles('ADMIN', 'STAFF') }, async (request, reply) => {
     const { id } = request.params as { id: string }
     const body = request.body as { passportPhoto?: string | null }
 
