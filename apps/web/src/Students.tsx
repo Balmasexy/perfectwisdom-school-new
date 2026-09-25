@@ -33,6 +33,15 @@ type Student = {
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
 }
 
+type ParentLookup = {
+  id: string
+  firstName: string
+  lastName: string
+  otherName: string | null
+  phoneNumber: string | null
+  email: string | null
+}
+
 type Branch = {
   id: string
   name: string
@@ -83,6 +92,11 @@ export default function Students({ onRegisterExam }: Props) {
   const [selected, setSelected] = useState<Student | null>(null)
   const [profileId, setProfileId] = useState<string | null>(null)
   const [form, setForm] = useState(emptyForm)
+  const [parentSearch, setParentSearch] = useState('')
+  const [parentResults, setParentResults] = useState<ParentLookup[]>([])
+  const [selectedParent, setSelectedParent] = useState<ParentLookup | null>(null)
+  const [parentSearching, setParentSearching] = useState(false)
+
 
   async function load() {
     try {
@@ -121,6 +135,40 @@ export default function Students({ onRegisterExam }: Props) {
     void load()
   }, [])
 
+  async function searchParents(value: string) {
+    setParentSearch(value)
+
+    if (value.trim().length < 2) {
+      setParentResults([])
+      return
+    }
+
+    try {
+      setParentSearching(true)
+
+      const results = await apiRequest<ParentLookup[]>(
+        `/parents?search=${encodeURIComponent(value.trim())}`,
+      )
+
+      setParentResults(results || [])
+    } catch {
+      setParentResults([])
+    } finally {
+      setParentSearching(false)
+    }
+  }
+
+  function selectParent(parent: ParentLookup) {
+    setSelectedParent(parent)
+    setParentSearch('')
+    setParentResults([])
+
+    setForm({
+      ...form,
+      parentId: parent.id,
+    })
+  }
+
   async function createStudent(event: React.FormEvent) {
     event.preventDefault()
 
@@ -144,6 +192,9 @@ export default function Students({ onRegisterExam }: Props) {
       })
 
       setForm(emptyForm)
+      setSelectedParent(null)
+      setParentSearch('')
+      setParentResults([])
       setShowForm(false)
       await load()
     } catch (err) {
@@ -364,7 +415,101 @@ export default function Students({ onRegisterExam }: Props) {
             </div>
 
             <form onSubmit={createStudent}>
-              <div className="student-form-grid">
+                              <div className="md:col-span-2 relative">
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Parent / Guardian
+                  </label>
+
+                  {selectedParent ? (
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="font-semibold text-slate-900">
+                            {selectedParent.firstName}{' '}
+                            {selectedParent.otherName
+                              ? `${selectedParent.otherName} `
+                              : ''}
+                            {selectedParent.lastName}
+                          </div>
+                          <div className="mt-1 text-sm text-slate-600">
+                            {selectedParent.phoneNumber || 'No phone number'}
+                            {selectedParent.email
+                              ? ` • ${selectedParent.email}`
+                              : ''}
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                          onClick={() => {
+                            setSelectedParent(null)
+                            setParentSearch('')
+                            setForm({
+                              ...form,
+                              parentId: '',
+                            })
+                          }}
+                        >
+                          Change
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <input
+                        className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+                        value={parentSearch}
+                        onChange={(e) => void searchParents(e.target.value)}
+                        placeholder="Search parent by name, phone or email"
+                      />
+
+                      {parentSearching && (
+                        <div className="mt-2 text-sm text-slate-500">
+                          Searching parents...
+                        </div>
+                      )}
+
+                      {parentResults.length > 0 && (
+                        <div className="absolute left-0 right-0 z-40 mt-2 max-h-72 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-xl">
+                          {parentResults.map((parent) => (
+                            <button
+                              key={parent.id}
+                              type="button"
+                              className="block w-full border-b border-slate-100 px-4 py-3 text-left last:border-b-0 hover:bg-slate-50"
+                              onClick={() => selectParent(parent)}
+                            >
+                              <div className="font-semibold text-slate-900">
+                                {parent.firstName}{' '}
+                                {parent.otherName
+                                  ? `${parent.otherName} `
+                                  : ''}
+                                {parent.lastName}
+                              </div>
+
+                              <div className="mt-1 text-xs text-slate-500">
+                                {parent.phoneNumber || 'No phone'}
+                                {parent.email
+                                  ? ` • ${parent.email}`
+                                  : ''}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {parentSearch.trim().length >= 2 &&
+                        !parentSearching &&
+                        parentResults.length === 0 && (
+                          <div className="mt-2 text-sm text-slate-500">
+                            No matching parent or guardian found.
+                          </div>
+                        )}
+                    </>
+                  )}
+                </div>
+
+<div className="student-form-grid">
                 <label>
                   First Name *
                   <input

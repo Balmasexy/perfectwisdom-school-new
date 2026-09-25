@@ -9,6 +9,7 @@ import { authRoutes } from './routes/auth.js'
 import { paymentRoutes } from './routes/payments.js'
 import { jambRoutes } from './routes/jamb.js'
 import { examRegistrationRoutes } from './routes/exam-registrations.js'
+import { parentRoutes } from './routes/parents.js'
 import { studentRoutes } from './routes/students.js'
 import { classRoutes } from './routes/classes.js'
 import { admissionsRoutes } from './routes/admissions.js'
@@ -49,7 +50,8 @@ await app.register(authRoutes)
 await app.register(paymentRoutes)
 await app.register(jambRoutes)
 await app.register(examRegistrationRoutes)
-await app.register(studentRoutes)
+await app.register(parentRoutes)
+  await app.register(studentRoutes)
 await app.register(classRoutes)
 await app.register(admissionsRoutes)
 
