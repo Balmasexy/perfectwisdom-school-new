@@ -7588,3 +7588,170 @@ body {
     color: #8a9aad !important;
   }
 }
+
+/* =========================================================
+   WAEC / NECO — SUBJECT CHECKBOX + STEP NAVIGATION FIX
+   ========================================================= */
+
+.exam-step,
+.exam-section button,
+.exam-history-panel button {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.exam-step {
+  position: relative;
+  z-index: 5;
+  pointer-events: auto !important;
+}
+
+.exam-steps {
+  position: relative;
+  z-index: 4;
+}
+
+.exam-steps::after {
+  pointer-events: none;
+}
+
+/* Subject selection */
+
+.exam-subject-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 54px;
+  padding: 12px 14px;
+  border: 1px solid #d8e3ee;
+  border-radius: 12px;
+  background: #fff;
+  color: #243b53;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    border-color .15s ease,
+    background .15s ease,
+    box-shadow .15s ease,
+    transform .15s ease;
+}
+
+.exam-subject-option:hover {
+  border-color: #9db9d5;
+  background: #f8fbff;
+}
+
+.exam-subject-option:active {
+  transform: scale(.99);
+}
+
+.exam-subject-selected {
+  border-color: #1457a6 !important;
+  background: #eef5ff !important;
+  color: #0b3d78 !important;
+  box-shadow: 0 4px 13px rgba(20,87,166,.08);
+}
+
+.exam-subject-checkbox {
+  position: absolute;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0 !important;
+}
+
+.exam-subject-box {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border: 2px solid #b9c8d8;
+  border-radius: 6px;
+  background: #fff;
+  color: #1457a6;
+}
+
+.exam-subject-selected .exam-subject-box {
+  border-color: #1457a6;
+  background: #1457a6;
+  color: #fff;
+}
+
+.exam-subject-name {
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 750;
+}
+
+.exam-subject-checkbox:focus-visible + .exam-subject-box {
+  outline: 3px solid rgba(20,87,166,.18);
+  outline-offset: 2px;
+}
+
+/* NECO subject identity */
+
+.exam-neco .exam-subject-selected {
+  border-color: #15803d !important;
+  background: #effaf3 !important;
+  color: #126331 !important;
+}
+
+.exam-neco .exam-subject-selected .exam-subject-box {
+  border-color: #15803d;
+  background: #15803d;
+}
+
+/* Final confirmation subjects */
+
+.exam-confirm-subjects {
+  border-top: 1px solid #e4ebf3;
+  padding-top: 14px;
+}
+
+.exam-confirm-subject {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 31px;
+  padding: 6px 9px;
+  border: 1px solid #c8dced;
+  border-radius: 999px;
+  background: #f4f8fc;
+  color: #1457a6;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.exam-neco .exam-confirm-subject {
+  border-color: #c9e5d2;
+  background: #f1faf4;
+  color: #15803d;
+}
+
+/* Mobile subject cards */
+
+@media (max-width: 700px) {
+  .exam-subject-option {
+    min-height: 52px;
+    padding: 11px;
+  }
+
+  .exam-subject-name {
+    font-size: 13px;
+  }
+
+  .exam-confirm-subject {
+    font-size: 10px;
+  }
+
+  .exam-section-card .exam-form-grid + div {
+    margin-top: 16px;
+  }
+}

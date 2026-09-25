@@ -339,6 +339,32 @@ export default function ExamRegistration({
     )
   }
 
+  const goToStep = (nextStep: number) => {
+    setError('')
+    setStep(nextStep)
+    window.setTimeout(() => {
+      document.querySelector('.exam-workspace')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    }, 0)
+  }
+
+  const continueFromSubjects = () => {
+    if (!selectedSubjects.length) {
+      setError(`Select at least one ${examType} subject before continuing.`)
+      return
+    }
+
+    setError('')
+    goToStep(3)
+  }
+
+  const continueToPayment = () => {
+    setError('')
+    goToStep(4)
+  }
+
   const handlePassport = (file?: File) => {
     if (!file) return
 
@@ -568,7 +594,7 @@ export default function ExamRegistration({
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => setStep(item.id)}
+                    onClick={() => goToStep(item.id)}
                     className={`exam-step rounded-2xl p-3 text-left transition ${
                       active
                         ? 'exam-step-active bg-green-700 text-white shadow-sm'
@@ -885,7 +911,7 @@ export default function ExamRegistration({
               <div className="mt-7 flex justify-end">
                 <button
                   type="button"
-                  onClick={() => setStep(2)}
+                  onClick={() => goToStep(2)}
                   className="rounded-xl bg-green-700 px-6 py-3 text-sm font-bold text-white hover:bg-green-800"
                 >
                   Continue to Examination
@@ -972,19 +998,25 @@ export default function ExamRegistration({
                     const selected = selectedSubjects.includes(subject)
 
                     return (
-                      <button
+                      <label
                         key={subject}
-                        type="button"
-                        onClick={() => toggleSubject(subject)}
-                        className={`flex items-center justify-between rounded-xl border p-3 text-left text-sm font-semibold transition ${
-                          selected
-                            ? 'border-green-600 bg-green-50 text-green-800'
-                            : 'border-slate-200 bg-white text-slate-700 hover:border-green-300 hover:bg-slate-50'
+                        className={`exam-subject-option ${
+                          selected ? 'exam-subject-selected' : ''
                         }`}
                       >
-                        <span>{subject}</span>
-                        {selected && <CheckCircle2 size={17} />}
-                      </button>
+                        <input
+                          type="checkbox"
+                          checked={selected}
+                          onChange={() => toggleSubject(subject)}
+                          className="exam-subject-checkbox"
+                        />
+
+                        <span className="exam-subject-box" aria-hidden="true">
+                          {selected ? <CheckCircle2 size={18} /> : null}
+                        </span>
+
+                        <span className="exam-subject-name">{subject}</span>
+                      </label>
                     )
                   })}
                 </div>
@@ -993,7 +1025,7 @@ export default function ExamRegistration({
               <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
                 <button
                   type="button"
-                  onClick={() => setStep(1)}
+                  onClick={() => goToStep(1)}
                   className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
                 >
                   Back
@@ -1001,14 +1033,7 @@ export default function ExamRegistration({
 
                 <button
                   type="button"
-                  onClick={() => {
-                    if (!selectedSubjects.length) {
-                      setError(`Select at least one ${examType} subject.`)
-                      return
-                    }
-                    setError('')
-                    setStep(3)
-                  }}
+                  onClick={continueFromSubjects}
                   className="rounded-xl bg-green-700 px-6 py-3 text-sm font-bold text-white hover:bg-green-800"
                 >
                   Continue to Passport
@@ -1090,7 +1115,7 @@ export default function ExamRegistration({
 
                 <button
                   type="button"
-                  onClick={() => setStep(4)}
+                  onClick={continueToPayment}
                   className="rounded-xl bg-green-700 px-6 py-3 text-sm font-bold text-white hover:bg-green-800"
                 >
                   Continue to Payment
@@ -1180,6 +1205,21 @@ export default function ExamRegistration({
                     </p>
                   </div>
 
+                  <div className="sm:col-span-2 exam-confirm-subjects">
+                    <span className="text-slate-500">Selected Subjects</span>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {selectedSubjects.map((subject) => (
+                        <span
+                          key={subject}
+                          className="exam-confirm-subject"
+                        >
+                          <CheckCircle2 size={14} />
+                          {subject}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
                   <div>
                     <span className="text-slate-500">Passport</span>
                     <p className="font-bold text-slate-900">
@@ -1192,7 +1232,7 @@ export default function ExamRegistration({
               <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
                 <button
                   type="button"
-                  onClick={() => setStep(3)}
+                  onClick={() => goToStep(3)}
                   className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
                 >
                   Back
