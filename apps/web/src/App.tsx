@@ -31,6 +31,7 @@ import { apiRequest, clearAuthToken, setAuthToken } from './api'
 import Payments from './Payments'
 import Admissions from './Admissions'
 import EntranceAdmissions from './EntranceAdmissions'
+import JambRegistration from './JambRegistration'
 import ExamRegistration from './ExamRegistration'
 import ModuleWorkspace from './ModuleWorkspace'
 import Students from './Students'
@@ -1868,6 +1869,7 @@ function Dashboard({
   onSignOut: () => void
 }) {
   const [open, setOpen] = useState(false)
+  const [registrationOpen, setRegistrationOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('Dashboard')
   const [summary, setSummary] = useState({
     students: 0,
@@ -1937,7 +1939,7 @@ function Dashboard({
         ['Branches', loading ? '—' : String(summary.branches)],
         ['Attendance', '0%'],
       ],
-      nav: ['Dashboard', 'Students', 'Staff', 'Branches', 'Admissions', 'Admissions & Entrance', 'WAEC Registration', 'NECO Registration', 'Attendance', 'Classes', 'Reports', 'Settings', 'Device Security', 'Payments'],
+      nav: ['Dashboard', 'Students', 'Staff', 'Branches', 'Admissions', 'Admissions & Entrance', 'Registration', 'Attendance', 'Classes', 'Reports', 'Settings', 'Device Security', 'Payments'],
       panels: [
         {
           title: 'School Administration',
@@ -2057,8 +2059,7 @@ function Dashboard({
               Payments: CreditCard,
               'Admissions': ClipboardCheck,
               'Admissions & Entrance': ClipboardCheck,
-              'WAEC Registration': ClipboardCheck,
-              'NECO Registration': ClipboardCheck,
+              'Registration': ClipboardCheck,
               'Device Security': ShieldCheck,
               'My Students': Users,
               Assignments: ClipboardCheck,
@@ -2069,6 +2070,84 @@ function Dashboard({
             }
 
             const Icon = icons[label as keyof typeof icons] || LayoutDashboard
+
+            if (label === 'Registration') {
+              return (
+                <div className="registration-nav-group" key={label}>
+                  <button
+                    type="button"
+                    className={
+                      activeSection === 'JAMB' ||
+                      activeSection === 'WAEC Registration' ||
+                      activeSection === 'NECO Registration'
+                        ? 'registration-nav-trigger active'
+                        : 'registration-nav-trigger'
+                    }
+                    onClick={() => setRegistrationOpen((current) => !current)}
+                    aria-expanded={registrationOpen}
+                  >
+                    <Icon size={19} strokeWidth={2} />
+                    <span>Registration</span>
+                    <ChevronDown
+                      size={17}
+                      className={
+                        registrationOpen
+                          ? 'registration-chevron open'
+                          : 'registration-chevron'
+                      }
+                    />
+                  </button>
+
+                  {registrationOpen && (
+                    <div className="registration-subnav">
+                      <button
+                        type="button"
+                        className={activeSection === 'JAMB' ? 'active' : ''}
+                        onClick={() => {
+                          setActiveSection('JAMB')
+                          setOpen(false)
+                        }}
+                      >
+                        <span className="registration-subnav-dot" />
+                        <span>JAMB</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        className={
+                          activeSection === 'WAEC Registration'
+                            ? 'active'
+                            : ''
+                        }
+                        onClick={() => {
+                          setActiveSection('WAEC Registration')
+                          setOpen(false)
+                        }}
+                      >
+                        <span className="registration-subnav-dot" />
+                        <span>WAEC</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        className={
+                          activeSection === 'NECO Registration'
+                            ? 'active'
+                            : ''
+                        }
+                        onClick={() => {
+                          setActiveSection('NECO Registration')
+                          setOpen(false)
+                        }}
+                      >
+                        <span className="registration-subnav-dot" />
+                        <span>NECO</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )
+            }
 
             return (
               <button
@@ -2134,6 +2213,8 @@ function Dashboard({
             <Admissions />
           ) : (role === 'Admin' || role === 'Staff') && activeSection === 'Admissions & Entrance' ? (
             <EntranceAdmissions />
+          ) : (role === 'Admin' || role === 'Staff') && activeSection === 'JAMB' ? (
+            <JambRegistration />
           ) : (role === 'Admin' || role === 'Staff') && activeSection === 'WAEC Registration' ? (
             <ExamRegistration examType="WAEC" />
           ) : (role === 'Admin' || role === 'Staff') && activeSection === 'NECO Registration' ? (
