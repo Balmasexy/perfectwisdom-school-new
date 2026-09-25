@@ -486,6 +486,20 @@ export default function ExamRegistration({
         },
       )
 
+      // Save the captured passport against the linked PWS student.
+      // Exam registration itself does not store passport files.
+      if (form.studentId && passportPreview) {
+        await apiRequest(
+          `/students/${form.studentId}/passport`,
+          {
+            method: 'PATCH',
+            body: {
+              passportPhoto: passportPreview,
+            },
+          },
+        )
+      }
+
       setSuccess(
         `${examType} candidate ${data.registration.candidate_id} was registered successfully.`,
       )

@@ -288,6 +288,77 @@ export async function studentRoutes(app: FastifyInstance) {
     },
   )
 
+
+  /*
+   * PATCH PASSPORT PHOTO
+   */
+  app.patch(
+    '/students/:id/passport',
+    { preHandler: requireRoles('ADMIN', 'STAFF') },
+    async (request, reply) => {
+      const { id } = request.params as { id: string }
+      const body = request.body as {
+        passportPhoto?: string | null
+      }
+
+      const passportPhoto =
+        typeof body.passportPhoto === 'string'
+          ? body.passportPhoto.trim()
+          : ''
+
+      if (!passportPhoto) {
+        return reply.code(400).send({
+          error: 'Passport photo is required',
+        })
+      }
+
+      if (!passportPhoto.startsWith('data:image/')) {
+        return reply.code(400).send({
+          error: 'Passport photo must be a valid image',
+        })
+      }
+
+      // Keep passport uploads within a reasonable database payload size.
+      if (passportPhoto.length > 2_000_000) {
+        return reply.code(400).send({
+          error: 'Passport photo is too large. Maximum size is 1.5MB.',
+        })
+      }
+
+      const [existing] = await db
+        .select({ id: students.id })
+        .from(students)
+        .where(eq(students.id, id))
+
+      if (!existing) {
+        return reply.code(404).send({
+          error: 'Student record not found',
+        })
+      }
+
+      const [updated] = await db
+        .update(students)
+        .set({
+          passportPhoto,
+          updatedAt: new Date(),
+        })
+        .where(eq(students.id, id))
+        .returning()
+
+      if (!updated) {
+        return reply.code(404).send({
+          error: 'Student record could not be updated',
+        })
+      }
+
+      return reply.send({
+        id: updated.id,
+        passportPhoto: updated.passportPhoto,
+        updatedAt: updated.updatedAt,
+      })
+    },
+  )
+
   /*
    * UPDATE STUDENT
    */
