@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import {
   Camera,
@@ -178,6 +178,8 @@ export default function ExamRegistration({
   const [step, setStep] = useState(1)
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([])
   const [passportPreview, setPassportPreview] = useState('')
+  const cameraInputRef = useRef<HTMLInputElement>(null)
+  const uploadInputRef = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
@@ -1174,11 +1176,47 @@ export default function ExamRegistration({
                 <div>
                   <label className="exam-label">Passport Photograph</label>
 
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      onClick={() => cameraInputRef.current?.click()}
+                      className="flex items-center justify-center gap-2 rounded-xl bg-green-700 px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-green-800"
+                    >
+                      <Camera size={18} />
+                      Take Photo
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => uploadInputRef.current?.click()}
+                      className="flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+                    >
+                      <FileText size={18} />
+                      Upload Photo
+                    </button>
+                  </div>
+
                   <input
+                    ref={cameraInputRef}
                     type="file"
                     accept="image/*"
-                    onChange={(e) => handlePassport(e.target.files?.[0])}
-                    className="block w-full rounded-xl border border-slate-200 bg-white p-3 text-sm"
+                    capture="environment"
+                    onChange={(e) => {
+                      handlePassport(e.target.files?.[0])
+                      e.currentTarget.value = ''
+                    }}
+                    className="hidden"
+                  />
+
+                  <input
+                    ref={uploadInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      handlePassport(e.target.files?.[0])
+                      e.currentTarget.value = ''
+                    }}
+                    className="hidden"
                   />
 
                   <div className="mt-4 rounded-xl bg-slate-50 p-4 text-xs leading-5 text-slate-600">
@@ -1186,16 +1224,15 @@ export default function ExamRegistration({
                       Passport requirements
                     </p>
                     <ul className="mt-2 list-disc space-y-1 pl-4">
-                      <li>Use a clear passport-style image.</li>
+                      <li>Use the camera for a new passport photograph or upload an existing image.</li>
                       <li>Maximum file size: 2MB.</li>
-                      <li>Image formats are handled locally by the browser.</li>
+                      <li>Clear passport-style images work best.</li>
                     </ul>
                   </div>
 
-                  <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 p-4 text-xs leading-5 text-blue-800">
-                    The current PWS registration API does not yet permanently
-                    store passport files. This screen provides a working local
-                    preview only until passport storage is added to the backend.
+                  <div className="mt-4 rounded-xl border border-green-100 bg-green-50 p-4 text-xs leading-5 text-green-800">
+                    The passport is saved to the linked PWS student record when
+                    the registration is submitted.
                   </div>
                 </div>
               </div>
