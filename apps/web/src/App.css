@@ -5719,3 +5719,796 @@ body {
     width: 100%;
   }
 }
+
+/* =========================================================
+   PWS — ADMISSIONS / CLASSES / PAYMENTS FINAL WORKSPACE
+   ========================================================= */
+
+.management-page {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 24px;
+  background: var(--pws-bg);
+}
+
+.management-page > .dashboard-welcome,
+.management-page > .management-header {
+  margin-bottom: 22px;
+}
+
+.dashboard-welcome,
+.management-header {
+  background: linear-gradient(135deg, var(--pws-navy), var(--pws-blue));
+  color: #fff;
+  border-radius: 18px;
+  padding: 28px 30px;
+  box-shadow: 0 12px 30px rgba(6, 43, 92, .14);
+}
+
+.dashboard-welcome h1,
+.management-header h1 {
+  margin: 4px 0 8px;
+  font-size: clamp(25px, 3vw, 34px);
+  letter-spacing: -.5px;
+}
+
+.dashboard-welcome p,
+.management-header p {
+  margin: 0;
+  color: rgba(255,255,255,.82);
+  max-width: 760px;
+}
+
+.section-kicker,
+.dashboard-kicker {
+  color: var(--pws-gold);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .13em;
+}
+
+.management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+}
+
+.management-toolbar {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) 190px auto;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.management-search,
+.management-toolbar select,
+.management-toolbar input {
+  min-height: 46px;
+}
+
+.management-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: #fff;
+  border: 1px solid var(--pws-line);
+  border-radius: 11px;
+  padding: 0 14px;
+}
+
+.management-search svg {
+  color: var(--pws-muted);
+  flex: 0 0 auto;
+}
+
+.management-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+}
+
+.management-toolbar select {
+  border: 1px solid var(--pws-line);
+  border-radius: 11px;
+  background: #fff;
+  padding: 0 12px;
+}
+
+.management-primary-button,
+.management-secondary-button {
+  min-height: 44px;
+  border-radius: 10px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: .18s ease;
+}
+
+.management-primary-button {
+  background: var(--pws-blue);
+  color: #fff;
+}
+
+.management-primary-button:hover {
+  background: var(--pws-blue-2);
+  transform: translateY(-1px);
+}
+
+.management-secondary-button {
+  background: #fff;
+  color: var(--pws-navy);
+  border-color: var(--pws-line);
+}
+
+.management-secondary-button:hover {
+  border-color: var(--pws-blue);
+  color: var(--pws-blue);
+}
+
+.management-primary-button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.management-card {
+  background: #fff;
+  border: 1px solid var(--pws-line);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 5px 18px rgba(16,42,67,.05);
+  margin-bottom: 20px;
+}
+
+.management-card-header {
+  padding: 20px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  border-bottom: 1px solid var(--pws-line);
+}
+
+.management-card-header h2 {
+  margin: 0;
+  color: var(--pws-navy);
+  font-size: 18px;
+}
+
+.management-card-header p {
+  margin: 5px 0 0;
+  color: var(--pws-muted);
+  font-size: 13px;
+}
+
+.management-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.management-table,
+.student-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 850px;
+}
+
+.management-table th,
+.student-table th {
+  background: #f7f9fc;
+  color: #52657a;
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--pws-line);
+}
+
+.management-table td,
+.student-table td {
+  padding: 15px 16px;
+  border-bottom: 1px solid #edf2f7;
+  color: var(--pws-ink);
+  font-size: 13px;
+}
+
+.management-table tbody tr:hover,
+.student-table tbody tr:hover {
+  background: #f8fbff;
+}
+
+.management-table td:first-child,
+.student-table td:first-child {
+  font-weight: 700;
+}
+
+.management-empty {
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 7px;
+  padding: 30px;
+  color: var(--pws-muted);
+  text-align: center;
+}
+
+.management-error {
+  padding: 13px 16px;
+  margin-bottom: 16px;
+  border-radius: 11px;
+  border: 1px solid #f2c6c3;
+  background: #fff5f4;
+  color: var(--pws-red);
+}
+
+.security-success,
+.payment-success {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  margin-bottom: 16px;
+  border-radius: 11px;
+  background: #f0fdf4;
+  border: 1px solid #bbebca;
+  color: var(--pws-green);
+}
+
+/* Admission stats */
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.dashboard-stats > div {
+  background: #fff;
+  border: 1px solid var(--pws-line);
+  border-radius: 14px;
+  padding: 17px;
+  box-shadow: 0 4px 15px rgba(16,42,67,.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-stats > div::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--pws-blue);
+}
+
+.dashboard-stats span {
+  display: block;
+  color: var(--pws-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.dashboard-stats strong {
+  display: block;
+  margin-top: 7px;
+  font-size: 25px;
+  color: var(--pws-navy);
+}
+
+.status-badge,
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 25px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.admission-status-new {
+  color: #075985;
+  background: #e0f2fe;
+}
+
+.admission-status-under_review {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.admission-status-accepted,
+.admission-status-enrolled,
+.status-paid,
+.status-success {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.admission-status-waitlisted,
+.status-pending {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.admission-status-rejected,
+.status-failed {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.management-modal-backdrop,
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(4, 20, 40, .58);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  overflow-y: auto;
+}
+
+.management-modal,
+.student-modal {
+  width: min(920px, 100%);
+  max-height: calc(100vh - 36px);
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 25px 70px rgba(0,0,0,.25);
+}
+
+.management-modal-header,
+.student-modal-header {
+  padding: 20px 24px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+  border-bottom: 1px solid var(--pws-line);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #fff;
+}
+
+.management-modal-header h2,
+.student-modal-header h2 {
+  margin: 3px 0;
+  color: var(--pws-navy);
+}
+
+.management-icon-button,
+.icon-button {
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--pws-line);
+  border-radius: 9px;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.management-form-section {
+  padding: 22px 24px;
+  border-bottom: 1px solid var(--pws-line);
+}
+
+.management-form-section h3 {
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--pws-navy);
+  font-size: 15px;
+}
+
+.management-form-grid,
+.student-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 15px;
+}
+
+.management-form-grid label,
+.student-form-grid label,
+.payment-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #42566c;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.management-form-grid input,
+.management-form-grid select,
+.management-form-grid textarea,
+.student-form-grid input,
+.student-form-grid select,
+.payment-form input {
+  width: 100%;
+  border: 1px solid var(--pws-line);
+  border-radius: 9px;
+  padding: 11px 12px;
+  background: #fff;
+  color: var(--pws-ink);
+  outline: none;
+}
+
+.management-form-grid textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.management-form-grid input:focus,
+.management-form-grid select:focus,
+.management-form-grid textarea:focus,
+.student-form-grid input:focus,
+.student-form-grid select:focus,
+.payment-form input:focus {
+  border-color: var(--pws-blue);
+  box-shadow: 0 0 0 3px rgba(20,87,166,.1);
+}
+
+.management-form-full {
+  grid-column: 1 / -1;
+}
+
+.management-form-actions,
+.student-form-actions {
+  padding: 18px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Classes */
+.module-workspace {
+  max-width: 1480px;
+  margin: 0 auto;
+}
+
+.module-header {
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--pws-navy), var(--pws-blue));
+  color: #fff;
+  padding: 25px 28px;
+  box-shadow: 0 12px 30px rgba(6,43,92,.13);
+}
+
+.module-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.module-title h1 {
+  margin: 0;
+  font-size: 29px;
+}
+
+.module-header .module-eyebrow {
+  color: var(--pws-gold);
+}
+
+.student-toolbar {
+  margin: 18px 0;
+  display: grid;
+  grid-template-columns: 1fr 210px auto;
+  gap: 12px;
+  background: #fff;
+  border: 1px solid var(--pws-line);
+  padding: 12px;
+  border-radius: 14px;
+}
+
+.student-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--pws-line);
+  border-radius: 10px;
+  padding: 0 12px;
+}
+
+.student-search input {
+  border: 0;
+  outline: 0;
+  width: 100%;
+  min-height: 43px;
+}
+
+.student-toolbar select {
+  border: 1px solid var(--pws-line);
+  border-radius: 10px;
+  padding: 0 11px;
+  background: #fff;
+}
+
+.module-cards {
+  margin: 18px 0;
+}
+
+.module-card {
+  border: 1px solid var(--pws-line);
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.module-panel {
+  background: #fff;
+  border: 1px solid var(--pws-line);
+  border-radius: 15px;
+  overflow: hidden;
+  margin-top: 18px;
+}
+
+.module-panel-heading {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--pws-line);
+}
+
+.module-panel-heading h2 {
+  margin: 0;
+  color: var(--pws-navy);
+  font-size: 17px;
+}
+
+.module-panel-heading p {
+  margin: 5px 0 0;
+  color: var(--pws-muted);
+  font-size: 13px;
+}
+
+.student-table tbody tr {
+  cursor: pointer;
+}
+
+.student-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.student-detail-grid > div {
+  background: #f7f9fc;
+  border: 1px solid var(--pws-line);
+  border-radius: 11px;
+  padding: 14px;
+}
+
+.student-detail-grid span {
+  display: block;
+  color: var(--pws-muted);
+  font-size: 11px;
+  margin-bottom: 5px;
+}
+
+.student-detail-grid strong {
+  color: var(--pws-navy);
+}
+
+/* Payments */
+.payments-page .management-header {
+  margin-bottom: 18px;
+}
+
+.payment-method-grid {
+  display: grid;
+  grid-template-columns: .8fr 1.2fr;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.payment-method-card {
+  background: #fff;
+  border: 1px solid var(--pws-line);
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 5px 18px rgba(16,42,67,.05);
+}
+
+.payment-method-card:first-child {
+  border-top: 4px solid var(--pws-gold);
+}
+
+.payment-method-card:last-child {
+  border-top: 4px solid var(--pws-blue);
+}
+
+.payment-method-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--pws-blue-soft);
+  color: var(--pws-blue);
+  margin-bottom: 15px;
+}
+
+.payment-method-card h2 {
+  margin: 0 0 7px;
+  color: var(--pws-navy);
+}
+
+.payment-method-card > p {
+  color: var(--pws-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.opay-account-box {
+  margin: 18px 0;
+  padding: 15px;
+  border-radius: 12px;
+  background: #f7f9fc;
+  border: 1px solid var(--pws-line);
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 13px;
+}
+
+.opay-account-box div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.opay-account-box span {
+  color: var(--pws-muted);
+  font-size: 11px;
+}
+
+.opay-account-box strong {
+  color: var(--pws-navy);
+  font-size: 13px;
+}
+
+.copy-account-button {
+  grid-column: 1 / -1;
+  border: 1px solid var(--pws-line);
+  background: #fff;
+  border-radius: 9px;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--pws-blue);
+}
+
+.payment-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.payment-form .management-primary-button {
+  min-height: 43px;
+}
+
+@media (max-width: 1050px) {
+  .dashboard-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .payment-method-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .student-detail-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .management-page {
+    padding: 14px;
+  }
+
+  .dashboard-welcome,
+  .management-header,
+  .module-header {
+    padding: 20px;
+    border-radius: 14px;
+  }
+
+  .management-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .management-toolbar,
+  .student-toolbar,
+  .payment-form {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .management-form-grid,
+  .student-form-grid,
+  .opay-account-box {
+    grid-template-columns: 1fr;
+  }
+
+  .management-form-full {
+    grid-column: auto;
+  }
+
+  .management-modal-backdrop,
+  .modal-backdrop {
+    padding: 8px;
+  }
+
+  .management-modal,
+  .student-modal {
+    max-height: calc(100vh - 16px);
+    border-radius: 14px;
+  }
+
+  .student-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .management-card-header {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .dashboard-stats > div {
+    padding: 13px;
+  }
+
+  .dashboard-stats strong {
+    font-size: 21px;
+  }
+
+  .management-form-section,
+  .management-modal-header,
+  .student-modal-header {
+    padding: 17px;
+  }
+
+  .management-form-actions,
+  .student-form-actions {
+    padding: 15px 17px;
+  }
+
+  .management-primary-button,
+  .management-secondary-button {
+    width: 100%;
+  }
+}
