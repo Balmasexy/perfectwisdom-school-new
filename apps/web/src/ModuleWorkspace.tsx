@@ -180,6 +180,174 @@ const modules: Record<string, ModuleConfig> = {
 }
 
 
+
+function ReportsWorkspace({ role }: { role: 'Admin' | 'Staff' | 'Parent' }) {
+  const [report, setReport] = useState<'attendance' | 'academic' | 'financial'>('attendance')
+  const [generated, setGenerated] = useState(false)
+
+  const reports = [
+    { id: 'attendance', label: 'Attendance Report', icon: CalendarCheck },
+    { id: 'academic', label: 'Academic Report', icon: GraduationCap },
+    { id: 'financial', label: 'Financial Report', icon: BarChart3 },
+  ] as const
+
+  const current = reports.find((item) => item.id === report)!
+
+  const fields =
+    report === 'attendance'
+      ? ['Class', 'Student', 'From', 'To']
+      : report === 'academic'
+        ? ['Session', 'Term', 'Class', 'Student']
+        : ['Report Type', 'Class', 'From', 'To']
+
+  const kpis =
+    report === 'attendance'
+      ? ['Attendance Rate', 'Present', 'Absent', 'Late']
+      : report === 'academic'
+        ? ['Students', 'Average Score', 'Pass Rate', 'Subjects']
+        : ['Total Payments', 'Collected', 'Outstanding', 'Transactions']
+
+  return (
+    <div className="reports-workspace">
+      <div className="reports-hero">
+        <div>
+          <span className="module-eyebrow">{role} Workspace</span>
+          <h1>School Reports</h1>
+          <p>Generate clear attendance, academic and financial reports.</p>
+        </div>
+
+        <div className="reports-hero-badge">
+          <FileBarChart size={20} />
+          Reports Centre
+        </div>
+      </div>
+
+      <div className="reports-nav" role="tablist">
+        {reports.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            type="button"
+            className={report === id ? 'active' : ''}
+            onClick={() => {
+              setReport(id)
+              setGenerated(false)
+            }}
+          >
+            <Icon size={18} />
+            <span>{label}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="reports-summary">
+        <div>
+          <span>Report Type</span>
+          <strong>{current.label}</strong>
+          <small>Current workspace</small>
+        </div>
+
+        <div>
+          <span>Period</span>
+          <strong>Selected Range</strong>
+          <small>Use the filters below</small>
+        </div>
+
+        <div>
+          <span>Status</span>
+          <strong>{generated ? 'Generated' : 'Ready'}</strong>
+          <small>{generated ? 'Preview updated' : 'Awaiting filters'}</small>
+        </div>
+      </div>
+
+      <section className="reports-panel">
+        <div className="reports-panel-heading">
+          <div>
+            <span className="reports-kicker">
+              {current.label.toUpperCase()}
+            </span>
+
+            <h2>{current.label}</h2>
+
+            <p>
+              {report === 'attendance'
+                ? 'Review attendance by student, class and date range.'
+                : report === 'academic'
+                  ? 'Review results, grades and academic performance by term.'
+                  : 'Review payments, balances and school income.'}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="reports-primary"
+            onClick={() => setGenerated(true)}
+          >
+            Generate Report
+          </button>
+        </div>
+
+        <div className="reports-filters">
+          {fields.map((field) => (
+            <label key={field}>
+              {field}
+
+              {field === 'Student' ? (
+                <input placeholder="Search student" />
+              ) : (
+                <select>
+                  <option>
+                    {field === 'Term'
+                      ? 'First Term'
+                      : field === 'Session'
+                        ? 'Current session'
+                        : field === 'Report Type'
+                          ? 'Payment Summary'
+                          : field === 'From' || field === 'To'
+                            ? 'Select date'
+                            : 'All classes'}
+                  </option>
+                  <option>All classes</option>
+                  <option>JSS 1</option>
+                  <option>JSS 2</option>
+                  <option>JSS 3</option>
+                  <option>SS 1</option>
+                  <option>SS 2</option>
+                  <option>SS 3</option>
+                </select>
+              )}
+            </label>
+          ))}
+        </div>
+
+        <div className="reports-kpi-grid">
+          {kpis.map((label) => (
+            <div key={label}>
+              <span>{label}</span>
+              <strong>—</strong>
+            </div>
+          ))}
+        </div>
+
+        <div className="reports-preview">
+          <current.icon size={30} />
+
+          <h3>
+            {generated
+              ? `${current.label} generated`
+              : `${current.label} preview`}
+          </h3>
+
+          <p>
+            {generated
+              ? 'The workspace is ready for live records when the corresponding backend data is connected.'
+              : 'Choose your filters and generate the report.'}
+          </p>
+        </div>
+      </section>
+    </div>
+  )
+}
+
 function AttendanceWorkspace({ role }: { role: 'Admin' | 'Staff' | 'Parent' }) {
   const [view, setView] = useState<'take' | 'view' | 'today' | 'report'>('take')
   const [className, setClassName] = useState('')
@@ -440,6 +608,10 @@ export default function ModuleWorkspace({
 
   if (section === 'Attendance') {
     return <AttendanceWorkspace role={role} />
+  }
+
+  if (section === 'Reports') {
+    return <ReportsWorkspace role={role} />
   }
 
   if (!config) {
