@@ -29,6 +29,7 @@ import { browserSupportsWebAuthn, startAuthentication, startRegistration } from 
 import './App.css'
 import { apiRequest, setAuthToken } from './api'
 import Payments from './Payments'
+import Admissions from './Admissions'
 import EntranceAdmissions from './EntranceAdmissions'
 import ExamRegistration from './ExamRegistration'
 import ModuleWorkspace from './ModuleWorkspace'
@@ -1936,7 +1937,7 @@ function Dashboard({
         ['Branches', loading ? '—' : String(summary.branches)],
         ['Attendance', '0%'],
       ],
-      nav: ['Dashboard', 'Students', 'Staff', 'Branches', 'Admissions & Entrance', 'WAEC Registration', 'NECO Registration', 'Attendance', 'Classes', 'Reports', 'Settings', 'Device Security', 'Payments'],
+      nav: ['Dashboard', 'Students', 'Staff', 'Branches', 'Admissions', 'Admissions & Entrance', 'WAEC Registration', 'NECO Registration', 'Attendance', 'Classes', 'Reports', 'Settings', 'Device Security', 'Payments'],
       panels: [
         {
           title: 'School Administration',
@@ -2054,6 +2055,7 @@ function Dashboard({
               Reports: BarChart3,
               Settings: Settings,
               Payments: CreditCard,
+              'Admissions': ClipboardCheck,
               'Admissions & Entrance': ClipboardCheck,
               'WAEC Registration': ClipboardCheck,
               'NECO Registration': ClipboardCheck,
@@ -2128,6 +2130,8 @@ function Dashboard({
             <DeviceSecurity />
           ) : activeSection === 'Payments' ? (
             <Payments />
+          ) : role === 'Admin' && activeSection === 'Admissions' ? (
+            <Admissions />
           ) : (role === 'Admin' || role === 'Staff') && activeSection === 'Admissions & Entrance' ? (
             <EntranceAdmissions />
           ) : (role === 'Admin' || role === 'Staff') && activeSection === 'WAEC Registration' ? (
