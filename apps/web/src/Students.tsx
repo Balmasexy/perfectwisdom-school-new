@@ -58,7 +58,14 @@ const emptyForm = {
   parentId: '',
 }
 
-export default function Students() {
+type Props = {
+  onRegisterExam?: (
+    examType: 'WAEC' | 'NECO',
+    studentId: string,
+  ) => void
+}
+
+export default function Students({ onRegisterExam }: Props) {
   const [students, setStudents] = useState<Student[]>([])
   const [branches, setBranches] = useState<Branch[]>([])
   const [summary, setSummary] = useState<Summary>({
@@ -151,6 +158,7 @@ export default function Students() {
       <StudentProfile
         studentId={profileId}
         onBack={() => setProfileId(null)}
+        onRegisterExam={onRegisterExam}
       />
     )
   }

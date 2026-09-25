@@ -1871,6 +1871,8 @@ function Dashboard({
   const [open, setOpen] = useState(false)
   const [registrationOpen, setRegistrationOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('Dashboard')
+  const [registrationStudentId, setRegistrationStudentId] =
+    useState<string | null>(null)
   const [summary, setSummary] = useState({
     students: 0,
     staff: 0,
@@ -2294,13 +2296,28 @@ function Dashboard({
           ) : (role === 'Admin' || role === 'Staff') && activeSection === 'JAMB' ? (
             <JambRegistration />
           ) : (role === 'Admin' || role === 'Staff') && activeSection === 'WAEC Registration' ? (
-            <ExamRegistration examType="WAEC" />
+            <ExamRegistration
+              examType="WAEC"
+              initialStudentId={registrationStudentId}
+            />
           ) : (role === 'Admin' || role === 'Staff') && activeSection === 'NECO Registration' ? (
-            <ExamRegistration examType="NECO" />
+            <ExamRegistration
+              examType="NECO"
+              initialStudentId={registrationStudentId}
+            />
           ) : role === 'Admin' && activeSection === 'Staff' ? (
             <StaffManagement />
           ) : (role === 'Admin' || role === 'Staff') && activeSection === 'Students' ? (
-            <Students />
+            <Students
+              onRegisterExam={(examType, studentId) => {
+                setRegistrationStudentId(studentId)
+                setActiveSection(
+                  examType === 'WAEC'
+                    ? 'WAEC Registration'
+                    : 'NECO Registration',
+                )
+              }}
+            />
           ) : (role === 'Admin' || role === 'Staff') && activeSection === 'Classes' ? (
             <Classes />
           ) : role === 'Admin' && activeSection === 'Branches' ? (

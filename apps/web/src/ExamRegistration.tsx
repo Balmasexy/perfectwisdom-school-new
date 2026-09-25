@@ -19,6 +19,28 @@ type Branch = {
   name: string
 }
 
+type StudentLookup = {
+  id: string
+  studentId: string
+  firstName: string
+  lastName: string
+  otherName: string | null
+  phoneNumber: string
+  dateOfBirth: string | null
+  gender: string | null
+  branchId: string | null
+  branchName: string | null
+  branchCode: string | null
+  classId: string | null
+  className: string | null
+  classCode: string | null
+  parentId: string | null
+  parentFirstName: string | null
+  parentLastName: string | null
+  parentPhoneNumber: string | null
+  status: string
+}
+
 type Registration = {
   id: string
   candidate_id: string
@@ -143,8 +165,10 @@ const steps = [
 
 export default function ExamRegistration({
   examType,
+  initialStudentId,
 }: {
   examType: ExamType
+  initialStudentId?: string | null
 }) {
   const [form, setForm] = useState<FormState>(createInitialForm())
   const [branches, setBranches] = useState<Branch[]>([])
@@ -156,6 +180,13 @@ export default function ExamRegistration({
   const [passportPreview, setPassportPreview] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+
+  const [studentSearch, setStudentSearch] = useState('')
+  const [studentResults, setStudentResults] = useState<StudentLookup[]>([])
+  const [selectedStudent, setSelectedStudent] =
+    useState<StudentLookup | null>(null)
+  const [studentSearching, setStudentSearching] = useState(false)
+
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
@@ -173,6 +204,99 @@ export default function ExamRegistration({
       setBranches([])
     }
   }
+
+  const searchStudents = async (value: string) => {
+    setStudentSearch(value)
+
+    if (value.trim().length < 2) {
+      setStudentResults([])
+      return
+    }
+
+    try {
+      setStudentSearching(true)
+
+      const response = await apiRequest<{
+        students: StudentLookup[]
+        total: number
+      }>(`/students?search=${encodeURIComponent(value.trim())}`)
+
+      setStudentResults(response.students || [])
+    } catch (err) {
+      setStudentResults([])
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Unable to search students',
+      )
+    } finally {
+      setStudentSearching(false)
+    }
+  }
+
+  const selectStudent = (student: StudentLookup) => {
+    setSelectedStudent(student)
+    setStudentSearch('')
+    setStudentResults([])
+
+    setForm((current) => ({
+      ...current,
+      studentId: student.id,
+      firstName: student.firstName,
+      lastName: student.lastName,
+      otherName: student.otherName || '',
+      phoneNumber: student.phoneNumber || '',
+      dateOfBirth: student.dateOfBirth || '',
+      gender: student.gender || '',
+      branchId: student.branchId || '',
+    }))
+  }
+
+  useEffect(() => {
+    if (!initialStudentId) return
+
+    let cancelled = false
+
+    async function loadInitialStudent() {
+      try {
+        const student = await apiRequest<StudentLookup>(
+          `/students/${initialStudentId}`,
+        )
+
+        if (cancelled) return
+
+        setSelectedStudent(student)
+        setStudentSearch('')
+        setStudentResults([])
+
+        setForm((current) => ({
+          ...current,
+          studentId: student.id,
+          firstName: student.firstName,
+          lastName: student.lastName,
+          otherName: student.otherName || '',
+          phoneNumber: student.phoneNumber || '',
+          dateOfBirth: student.dateOfBirth || '',
+          gender: student.gender || '',
+          branchId: student.branchId || '',
+        }))
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : 'Unable to load selected student',
+          )
+        }
+      }
+    }
+
+    void loadInitialStudent()
+
+    return () => {
+      cancelled = true
+    }
+  }, [initialStudentId])
 
   const loadRegistrations = async () => {
     setLoading(true)
@@ -499,15 +623,139 @@ export default function ExamRegistration({
               </div>
 
               <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-                <div>
-                  <label className={labelClass}>PWS Student ID</label>
-                  <input
-                    className={inputClass}
-                    value={form.studentId}
-                    onChange={(e) => updateField('studentId', e.target.value)}
-                    placeholder="Optional student UUID"
-                  />
+                <div className="md:col-span-2">
+            <label className={labelClass}>
+              Search Existing Student
+            </label>
+
+            {selectedStudent ? (
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Selected Student
+                    </div>
+
+                    <div className="mt-1 text-lg font-bold text-slate-900">
+                      {selectedStudent.firstName}{' '}
+                      {selectedStudent.otherName
+                        ? `${selectedStudent.otherName} `
+                        : ''}
+                      {selectedStudent.lastName}
+                    </div>
+
+                    <div className="mt-2 grid gap-1 text-sm text-slate-600 sm:grid-cols-2">
+                      <div>
+                        <span className="font-semibold">Student ID:</span>{' '}
+                        {selectedStudent.studentId}
+                      </div>
+
+                      <div>
+                        <span className="font-semibold">Class:</span>{' '}
+                        {selectedStudent.className ||
+                          selectedStudent.classCode ||
+                          'Not assigned'}
+                      </div>
+
+                      <div>
+                        <span className="font-semibold">Branch:</span>{' '}
+                        {selectedStudent.branchName ||
+                          selectedStudent.branchCode ||
+                          'Not assigned'}
+                      </div>
+
+                      <div>
+                        <span className="font-semibold">Parent:</span>{' '}
+                        {selectedStudent.parentFirstName ||
+                        selectedStudent.parentLastName
+                          ? `${selectedStudent.parentFirstName || ''} ${
+                              selectedStudent.parentLastName || ''
+                            }`.trim()
+                          : 'Not linked'}
+                      </div>
+
+                      <div>
+                        <span className="font-semibold">Parent Phone:</span>{' '}
+                        {selectedStudent.parentPhoneNumber ||
+                          'Not available'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                    onClick={() => {
+                      setSelectedStudent(null)
+                      setStudentSearch('')
+                      setForm((current) => ({
+                        ...current,
+                        studentId: '',
+                      }))
+                    }}
+                  >
+                    Change Student
+                  </button>
                 </div>
+              </div>
+            ) : (
+              <div className="relative">
+                <input
+                  className={inputClass}
+                  value={studentSearch}
+                  onChange={(e) => void searchStudents(e.target.value)}
+                  placeholder="Search by PWS Student ID, name or phone"
+                />
+
+                {studentSearching && (
+                  <div className="mt-2 text-sm text-slate-500">
+                    Searching students...
+                  </div>
+                )}
+
+                {studentResults.length > 0 && (
+                  <div className="absolute z-20 mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-xl">
+                    {studentResults.map((student) => (
+                      <button
+                        key={student.id}
+                        type="button"
+                        className="block w-full border-b border-slate-100 px-4 py-3 text-left last:border-b-0 hover:bg-slate-50"
+                        onClick={() => selectStudent(student)}
+                      >
+                        <div className="font-semibold text-slate-900">
+                          {student.firstName}{' '}
+                          {student.otherName
+                            ? `${student.otherName} `
+                            : ''}
+                          {student.lastName}
+                        </div>
+
+                        <div className="mt-1 text-xs text-slate-500">
+                          {student.studentId}
+                          {' • '}
+                          {student.className ||
+                            student.classCode ||
+                            'No class'}
+                          {' • '}
+                          {student.branchName ||
+                            student.branchCode ||
+                            'No branch'}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {studentSearch.trim().length >= 2 &&
+                  !studentSearching &&
+                  studentResults.length === 0 && (
+                    <div className="mt-2 text-sm text-slate-500">
+                      No matching students found.
+                    </div>
+                  )}
+              </div>
+            )}
+          </div>
 
                 <div>
                   <label className={labelClass}>First Name *</label>

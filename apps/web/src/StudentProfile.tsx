@@ -44,12 +44,32 @@ type Student = {
   status: string
 }
 
+type ExamRegistration = {
+  id: string
+  candidate_id: string
+  exam_type: string
+  exam_year: number
+  status: string
+  payment_status: string
+  amount: string | number
+  payment_reference?: string | null
+  created_at: string
+}
+
 type Props = {
   studentId: string
   onBack: () => void
+  onRegisterExam?: (
+    examType: 'WAEC' | 'NECO',
+    studentId: string,
+  ) => void
 }
 
-export default function StudentProfile({ studentId, onBack }: Props) {
+export default function StudentProfile({
+  studentId,
+  onBack,
+  onRegisterExam,
+}: Props) {
   const [student, setStudent] = useState<Student | null>(null)
   const [classes, setClasses] = useState<SchoolClass[]>([])
   const [selectedClassId, setSelectedClassId] = useState('')
@@ -57,6 +77,8 @@ export default function StudentProfile({ studentId, onBack }: Props) {
   const [savingClass, setSavingClass] = useState(false)
   const [error, setError] = useState('')
   const [classMessage, setClassMessage] = useState('')
+  const [examRegistrations, setExamRegistrations] =
+    useState<ExamRegistration[]>([])
 
   useEffect(() => {
     let cancelled = false
@@ -66,15 +88,26 @@ export default function StudentProfile({ studentId, onBack }: Props) {
         setLoading(true)
         setError('')
 
-        const [data, classData] = await Promise.all([
-          apiRequest<Student>(`/students/${studentId}`),
-          apiRequest<SchoolClass[]>('/classes'),
-        ])
+        const [data, classData, waecData, necoData] =
+          await Promise.all([
+            apiRequest<Student>(`/students/${studentId}`),
+            apiRequest<SchoolClass[]>('/classes'),
+            apiRequest<ExamRegistration[]>(
+              `/exam-registrations?examType=WAEC&studentId=${encodeURIComponent(studentId)}`,
+            ),
+            apiRequest<ExamRegistration[]>(
+              `/exam-registrations?examType=NECO&studentId=${encodeURIComponent(studentId)}`,
+            ),
+          ])
 
         if (!cancelled) {
           setStudent(data)
           setClasses(classData || [])
           setSelectedClassId(data.classId || '')
+          setExamRegistrations([
+            ...(waecData || []),
+            ...(necoData || []),
+          ])
         }
       } catch (err) {
         if (!cancelled) {
@@ -377,6 +410,124 @@ export default function StudentProfile({ studentId, onBack }: Props) {
               <div className="module-success">{classMessage}</div>
             )}
           </div>
+        </section>
+
+        <section className="module-panel">
+          <div className="module-panel-heading">
+            <div>
+              <h2>Examination Registration</h2>
+              <p>
+                Register this student for WAEC or NECO and view previous
+                examination registrations.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                className="module-action"
+                onClick={() =>
+                  onRegisterExam?.('WAEC', student.id)
+                }
+              >
+                Register WAEC
+              </button>
+
+              <button
+                type="button"
+                className="module-action"
+                onClick={() =>
+                  onRegisterExam?.('NECO', student.id)
+                }
+              >
+                Register NECO
+              </button>
+            </div>
+          </div>
+
+          {examRegistrations.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm text-slate-500">
+              No WAEC or NECO registration has been recorded for this
+              student.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {examRegistrations
+                .slice()
+                .sort(
+                  (a, b) =>
+                    Number(b.exam_year) - Number(a.exam_year),
+                )
+                .map((registration) => (
+                  <div
+                    key={registration.id}
+                    className="rounded-xl border border-slate-200 bg-white p-4"
+                  >
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <strong className="text-slate-900">
+                            {registration.exam_type}
+                          </strong>
+
+                          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                            {registration.exam_year}
+                          </span>
+                        </div>
+
+                        <div className="mt-2 grid gap-1 text-sm text-slate-600 sm:grid-cols-2">
+                          <div>
+                            <span className="font-semibold">
+                              Candidate ID:
+                            </span>{' '}
+                            {registration.candidate_id}
+                          </div>
+
+                          <div>
+                            <span className="font-semibold">
+                              Registration:
+                            </span>{' '}
+                            {registration.status}
+                          </div>
+
+                          <div>
+                            <span className="font-semibold">
+                              Payment:
+                            </span>{' '}
+                            {registration.payment_status}
+                          </div>
+
+                          <div>
+                            <span className="font-semibold">
+                              Amount:
+                            </span>{' '}
+                            ₦
+                            {Number(
+                              registration.amount || 0,
+                            ).toLocaleString()}
+                          </div>
+
+                          {registration.payment_reference && (
+                            <div className="sm:col-span-2">
+                              <span className="font-semibold">
+                                Payment Reference:
+                              </span>{' '}
+                              {registration.payment_reference}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <span className="text-xs text-slate-400">
+                        {new Date(
+                          registration.created_at,
+                        ).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
         </section>
 
         <section className="module-panel">

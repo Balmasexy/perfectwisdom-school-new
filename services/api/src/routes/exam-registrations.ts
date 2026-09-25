@@ -57,6 +57,7 @@ export async function examRegistrationRoutes(app: FastifyInstance) {
         branchId?: string
         examYear?: string
         status?: string
+        studentId?: string
       }
 
       const examType = normalizeExamType(query.examType)
@@ -91,6 +92,10 @@ export async function examRegistrationRoutes(app: FastifyInstance) {
 
       if (query.status) {
         conditions.push(sql`er.status = ${query.status}`)
+      }
+
+      if (query.studentId) {
+        conditions.push(sql`er.student_id = ${query.studentId}::uuid`)
       }
 
       const whereClause = sql`
