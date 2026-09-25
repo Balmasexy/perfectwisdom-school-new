@@ -3336,3 +3336,393 @@ body {
     padding-bottom: 40px;
   }
 }
+
+/* =========================================================
+   PERFECT WISDOM SCHOOL — ADMISSIONS MANAGEMENT
+   ========================================================= */
+
+.management-toolbar {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) 180px auto;
+  gap: 12px;
+  align-items: center;
+  margin: 22px 0;
+}
+
+.management-search {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 13px;
+  background: #fff;
+  border: 1px solid #d8e3ef;
+  border-radius: 10px;
+  color: #64748b;
+}
+
+.management-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #102a43;
+  font: inherit;
+}
+
+.management-toolbar > select {
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid #d8e3ef;
+  border-radius: 10px;
+  background: #fff;
+  color: #243b53;
+  font-weight: 600;
+}
+
+.management-toolbar .management-primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+/* Admission status colours */
+.admission-status-new {
+  background: #e8f1ff !important;
+  color: #1558a6 !important;
+}
+
+.admission-status-under_review {
+  background: #fff4d6 !important;
+  color: #9a6700 !important;
+}
+
+.admission-status-accepted {
+  background: #e8f8ee !important;
+  color: #147a45 !important;
+}
+
+.admission-status-waitlisted {
+  background: #f1edff !important;
+  color: #6542a5 !important;
+}
+
+.admission-status-rejected {
+  background: #fff0ef !important;
+  color: #b42318 !important;
+}
+
+.admission-status-enrolled {
+  background: #e5f7f5 !important;
+  color: #087f72 !important;
+}
+
+/* Modal */
+.management-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(4, 22, 45, 0.62);
+  backdrop-filter: blur(4px);
+  overflow-y: auto;
+}
+
+.management-modal {
+  width: min(960px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #dce7f2;
+  border-radius: 20px;
+  box-shadow: 0 28px 80px rgba(6, 43, 92, 0.28);
+}
+
+.management-modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 24px;
+  background: rgba(255,255,255,.97);
+  border-bottom: 1px solid #e5edf5;
+  backdrop-filter: blur(8px);
+}
+
+.management-modal-header h2 {
+  margin: 5px 0 0;
+  color: #062b5c;
+  font-size: 24px;
+  font-weight: 850;
+}
+
+.management-icon-button {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid #d7e3ef;
+  border-radius: 10px;
+  background: #fff;
+  color: #52657d;
+  cursor: pointer;
+}
+
+.management-icon-button:hover {
+  background: #f5f8fc;
+  color: #062b5c;
+  border-color: #f28c18;
+}
+
+/* Modal sections */
+.management-form-section {
+  margin: 0 24px;
+  padding: 22px 0;
+  border-bottom: 1px solid #e8eef5;
+}
+
+.management-form-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 18px;
+  color: #062b5c;
+  font-size: 16px;
+  font-weight: 850;
+}
+
+.management-form-section h3 svg {
+  color: #f28c18;
+}
+
+.management-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.management-form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #243b53;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.management-form-grid input,
+.management-form-grid select,
+.management-form-grid textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #ccd9e7;
+  border-radius: 9px;
+  outline: none;
+  background: #f9fbfd;
+  color: #102a43;
+  font: inherit;
+}
+
+.management-form-grid textarea {
+  min-height: 90px;
+  resize: vertical;
+  padding-top: 11px;
+}
+
+.management-form-grid input:focus,
+.management-form-grid select:focus,
+.management-form-grid textarea:focus {
+  border-color: #1457a6;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(20,87,166,.10);
+}
+
+.management-form-full {
+  grid-column: 1 / -1;
+}
+
+.management-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 24px 24px;
+}
+
+/* Detail view */
+.management-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 22px 24px 0;
+}
+
+.management-detail-grid > div {
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid #e1e9f2;
+  border-radius: 12px;
+  background: #f8fbfe;
+}
+
+.management-detail-grid span {
+  display: block;
+  margin-bottom: 6px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.management-detail-grid strong {
+  display: block;
+  color: #243b53;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+/* Better admission statistics */
+.management-page .dashboard-stats {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.management-page .dashboard-stats > div {
+  min-width: 0;
+  padding: 17px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #dce7f2;
+  box-shadow: 0 6px 20px rgba(6,43,92,.045);
+}
+
+.management-page .dashboard-stats > div span {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.management-page .dashboard-stats > div strong {
+  font-size: 25px;
+}
+
+/* Success message */
+.management-page .security-success {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 18px;
+  padding: 13px 15px;
+  border: 1px solid #b9e5c9;
+  border-radius: 10px;
+  background: #eefaf2;
+  color: #147a45;
+  font-weight: 700;
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+  .management-toolbar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .management-toolbar .management-search {
+    grid-column: 1 / -1;
+  }
+
+  .management-page .dashboard-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .management-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .management-toolbar .management-search {
+    grid-column: auto;
+  }
+
+  .management-toolbar > select,
+  .management-toolbar .management-primary-button {
+    width: 100%;
+  }
+
+  .management-page .dashboard-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .management-modal-backdrop {
+    align-items: flex-start;
+    padding: 10px;
+  }
+
+  .management-modal {
+    max-height: calc(100vh - 20px);
+    border-radius: 16px;
+  }
+
+  .management-modal-header {
+    padding: 17px;
+  }
+
+  .management-modal-header h2 {
+    font-size: 20px;
+  }
+
+  .management-form-section {
+    margin: 0 17px;
+    padding: 18px 0;
+  }
+
+  .management-form-grid,
+  .management-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .management-form-full {
+    grid-column: auto;
+  }
+
+  .management-form-actions {
+    flex-direction: column-reverse;
+    padding: 17px;
+  }
+
+  .management-form-actions button {
+    width: 100%;
+  }
+
+  .management-detail-grid {
+    padding: 17px 17px 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .management-page .dashboard-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .management-page .dashboard-stats > div {
+    padding: 14px;
+  }
+
+  .management-page .dashboard-stats > div strong {
+    font-size: 21px;
+  }
+}
+
