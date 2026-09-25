@@ -3974,3 +3974,251 @@ body {
   }
 }
 
+
+/* =========================================================
+   PWS REGISTRATION ACCORDION + JAMB WORKSPACE
+   ========================================================= */
+
+.registration-nav-group {
+  width: 100%;
+}
+
+.registration-nav-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.registration-nav-trigger > span:nth-child(2) {
+  flex: 1;
+}
+
+.registration-nav-trigger .registration-chevron {
+  margin-left: auto;
+  transition: transform .2s ease;
+}
+
+.registration-nav-trigger .registration-chevron.open {
+  transform: rotate(180deg);
+}
+
+.registration-nav-trigger.active {
+  color: #ffffff;
+}
+
+.registration-subnav {
+  position: relative;
+  margin: 3px 0 8px 21px;
+  padding-left: 16px;
+  border-left: 1px solid rgba(255,255,255,.16);
+}
+
+.registration-subnav button {
+  width: 100%;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255,255,255,.68);
+  cursor: pointer;
+  text-align: left;
+  font-size: 13px;
+  transition: background .18s ease, color .18s ease;
+}
+
+.registration-subnav button:hover {
+  background: rgba(255,255,255,.07);
+  color: #ffffff;
+}
+
+.registration-subnav button.active {
+  background: rgba(242,140,24,.14);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.registration-subnav-dot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.registration-subnav button.active .registration-subnav-dot {
+  background: #f28c18;
+  box-shadow: 0 0 0 3px rgba(242,140,24,.12);
+}
+
+/* JAMB tabs */
+.registration-workspace .registration-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 22px 0;
+}
+
+.registration-tab {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-height: 76px;
+  padding: 15px 17px;
+  border: 1px solid #dce7f2;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #52657d;
+  cursor: pointer;
+  text-align: left;
+  box-shadow: 0 5px 18px rgba(6,43,92,.04);
+  transition: border-color .18s ease, background .18s ease,
+    transform .18s ease, box-shadow .18s ease;
+}
+
+.registration-tab:hover {
+  transform: translateY(-1px);
+  border-color: #f28c18;
+  box-shadow: 0 8px 24px rgba(6,43,92,.07);
+}
+
+.registration-tab.active {
+  border-color: #1457a6;
+  background: linear-gradient(135deg, #f4f8ff, #ffffff);
+  color: #062b5c;
+  box-shadow: 0 8px 25px rgba(20,87,166,.09);
+}
+
+.registration-tab svg {
+  flex: 0 0 auto;
+}
+
+.registration-tab.active svg {
+  color: #f28c18;
+}
+
+.registration-tab span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.registration-tab strong {
+  font-size: 14px;
+}
+
+.registration-tab small {
+  color: #718096;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.registration-workspace .management-form {
+  overflow: hidden;
+}
+
+.registration-workspace .management-form-header {
+  padding: 24px;
+  border-bottom: 1px solid #e5edf5;
+}
+
+.registration-workspace .management-form-header h2 {
+  margin: 5px 0 7px;
+  color: #062b5c;
+}
+
+.registration-workspace .management-form-header p {
+  margin: 0;
+  color: #64748b;
+}
+
+.passport-profile-card {
+  padding: 32px;
+  border: 1px solid #dce7f2;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 8px 28px rgba(6,43,92,.05);
+}
+
+.passport-profile-icon {
+  width: 66px;
+  height: 66px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 18px;
+  border-radius: 16px;
+  background: #eef5ff;
+  color: #1457a6;
+}
+
+.passport-profile-card h2 {
+  margin: 6px 0 8px;
+  color: #062b5c;
+}
+
+.passport-profile-card > p {
+  max-width: 680px;
+  margin: 0 0 24px;
+  color: #64748b;
+  line-height: 1.65;
+}
+
+.passport-upload-box {
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 28px;
+  border: 2px dashed #cbd8e6;
+  border-radius: 16px;
+  background: #f8fbfe;
+  text-align: center;
+  color: #64748b;
+}
+
+.passport-upload-box svg {
+  color: #1457a6;
+  margin-bottom: 5px;
+}
+
+.passport-upload-box strong {
+  color: #243b53;
+  font-size: 16px;
+}
+
+.passport-upload-box span {
+  max-width: 420px;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.passport-upload-box button:disabled {
+  opacity: .65;
+  cursor: not-allowed;
+}
+
+@media (max-width: 700px) {
+  .registration-workspace .registration-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .passport-profile-card {
+    padding: 20px;
+  }
+
+  .passport-upload-box {
+    min-height: 220px;
+    padding: 20px;
+  }
+}
+

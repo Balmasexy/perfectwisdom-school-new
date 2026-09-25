@@ -2149,6 +2149,84 @@ function Dashboard({
               )
             }
 
+            if (label === 'Registration') {
+              return (
+                <div className="registration-nav-group" key={label}>
+                  <button
+                    type="button"
+                    className={
+                      activeSection === 'JAMB' ||
+                      activeSection === 'WAEC Registration' ||
+                      activeSection === 'NECO Registration'
+                        ? 'registration-nav-trigger active'
+                        : 'registration-nav-trigger'
+                    }
+                    onClick={() => setRegistrationOpen((current) => !current)}
+                    aria-expanded={registrationOpen}
+                  >
+                    <Icon size={19} strokeWidth={2} />
+                    <span>Registration</span>
+                    <ChevronDown
+                      size={17}
+                      className={
+                        registrationOpen
+                          ? 'registration-chevron open'
+                          : 'registration-chevron'
+                      }
+                    />
+                  </button>
+
+                  {registrationOpen && (
+                    <div className="registration-subnav">
+                      <button
+                        type="button"
+                        className={activeSection === 'JAMB' ? 'active' : ''}
+                        onClick={() => {
+                          setActiveSection('JAMB')
+                          setOpen(false)
+                        }}
+                      >
+                        <span className="registration-subnav-dot" />
+                        <span>JAMB</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        className={
+                          activeSection === 'WAEC Registration'
+                            ? 'active'
+                            : ''
+                        }
+                        onClick={() => {
+                          setActiveSection('WAEC Registration')
+                          setOpen(false)
+                        }}
+                      >
+                        <span className="registration-subnav-dot" />
+                        <span>WAEC</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        className={
+                          activeSection === 'NECO Registration'
+                            ? 'active'
+                            : ''
+                        }
+                        onClick={() => {
+                          setActiveSection('NECO Registration')
+                          setOpen(false)
+                        }}
+                      >
+                        <span className="registration-subnav-dot" />
+                        <span>NECO</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )
+            }
+
             return (
               <button
                 key={label}
