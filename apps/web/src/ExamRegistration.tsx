@@ -8,6 +8,7 @@ import {
   FileText,
   GraduationCap,
   UserRound,
+  BookOpen,
 } from 'lucide-react'
 import { apiRequest } from './api'
 
@@ -156,8 +157,10 @@ const sectionSubjects: Record<ExamType, string[]> = {
 const steps = [
   { id: 1, label: 'Candidate Profile', icon: UserRound },
   { id: 2, label: 'Examination', icon: GraduationCap },
-  { id: 3, label: 'Passport', icon: Camera },
-  { id: 4, label: 'Payment', icon: CreditCard },
+  { id: 3, label: 'Subjects', icon: BookOpen },
+  { id: 4, label: 'Passport', icon: Camera },
+  { id: 5, label: 'Payment', icon: CreditCard },
+  { id: 6, label: 'Confirmation', icon: CheckCircle2 },
 ]
 
 export default function ExamRegistration({
@@ -350,9 +353,33 @@ export default function ExamRegistration({
     }, 0)
   }
 
-  const continueFromSubjects = () => {
-    if (!selectedSubjects.length) {
-      setError(`Select at least one ${examType} subject before continuing.`)
+  const continueFromCandidate = () => {
+    if (!form.firstName.trim() || !form.lastName.trim()) {
+      setError('First name and last name are required.')
+      goToStep(1)
+      return
+    }
+
+    if (form.ninLast4 && !/^\d{4}$/.test(form.ninLast4)) {
+      setError('NIN last 4 digits must contain exactly 4 numbers.')
+      goToStep(1)
+      return
+    }
+
+    if (!form.phoneNumber.trim()) {
+      setError('Phone number is required.')
+      goToStep(1)
+      return
+    }
+
+    setError('')
+    goToStep(2)
+  }
+
+  const continueFromExamination = () => {
+    if (!form.examYear) {
+      setError('Please select the examination year before continuing.')
+      goToStep(2)
       return
     }
 
@@ -360,9 +387,25 @@ export default function ExamRegistration({
     goToStep(3)
   }
 
-  const continueToPayment = () => {
+  const continueFromSubjects = () => {
+    if (!selectedSubjects.length) {
+      setError(`Select at least one ${examType} subject before continuing.`)
+      goToStep(3)
+      return
+    }
+
     setError('')
     goToStep(4)
+  }
+
+  const continueFromPassport = () => {
+    setError('')
+    goToStep(5)
+  }
+
+  const continueFromPayment = () => {
+    setError('')
+    goToStep(6)
   }
 
   const handlePassport = (file?: File) => {
@@ -584,24 +627,27 @@ export default function ExamRegistration({
 
           {/* STEPS */}
           <div className="exam-steps" aria-label={`${examType} registration progress`}>
-            <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
               {steps.map((item) => {
                 const Icon = item.icon
                 const active = step === item.id
                 const completed = step > item.id
+                const locked = item.id > step
 
                 return (
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => goToStep(item.id)}
+                    onClick={() => item.id <= step && goToStep(item.id)}
+                    disabled={locked}
+                    aria-current={active ? 'step' : undefined}
                     className={`exam-step rounded-2xl p-3 text-left transition ${
                       active
                         ? 'exam-step-active bg-green-700 text-white shadow-sm'
                         : completed
                           ? 'exam-step-complete bg-green-50 text-green-800'
                           : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
-                    }`}
+                    } ${locked ? 'cursor-not-allowed opacity-60' : ''}`}
                   >
                     <div className="flex items-center gap-3">
                       <div
@@ -911,7 +957,7 @@ export default function ExamRegistration({
               <div className="mt-7 flex justify-end">
                 <button
                   type="button"
-                  onClick={() => goToStep(2)}
+                  onClick={continueFromCandidate}
                   className="rounded-xl bg-green-700 px-6 py-3 text-sm font-bold text-white hover:bg-green-800"
                 >
                   Continue to Examination
@@ -931,8 +977,7 @@ export default function ExamRegistration({
                   Examination Details
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
-                  Configure the examination year, registration type, centre and
-                  candidate subjects.
+                  Configure the examination year, registration type and examination centre.
                 </p>
               </div>
 
@@ -975,6 +1020,41 @@ export default function ExamRegistration({
                     placeholder="Centre name / code"
                   />
                 </div>
+              </div>
+
+              <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+                <button
+                  type="button"
+                  onClick={() => goToStep(1)}
+                  className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                >
+                  Back
+                </button>
+
+                <button
+                  type="button"
+                  onClick={continueFromExamination}
+                  className="rounded-xl bg-green-700 px-6 py-3 text-sm font-bold text-white hover:bg-green-800"
+                >
+                  Continue to Subjects
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3 */}
+          {step === 3 && (
+            <div className="exam-section exam-section-card">
+              <div className="exam-section-title">
+                <p className="text-xs font-bold uppercase tracking-wider text-green-700">
+                  Step 3
+                </p>
+                <h2 className="mt-1 text-xl font-black text-slate-900">
+                  Subject Selection
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Select the subjects being recorded for this candidate.
+                </p>
               </div>
 
               <div className="mt-7">
@@ -1022,13 +1102,15 @@ export default function ExamRegistration({
                 </div>
               </div>
 
+
+
               <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
                 <button
                   type="button"
-                  onClick={() => goToStep(1)}
+                  onClick={() => goToStep(2)}
                   className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
                 >
-                  Back
+                  Back to Examination
                 </button>
 
                 <button
@@ -1042,12 +1124,12 @@ export default function ExamRegistration({
             </div>
           )}
 
-          {/* STEP 3 */}
-          {step === 3 && (
+          {/* STEP 4 */}
+          {step === 4 && (
             <div className="exam-section exam-section-card">
               <div className="exam-section-title">
                 <p className="text-xs font-bold uppercase tracking-wider text-green-700">
-                  Step 3
+                  Step 4
                 </p>
                 <h2 className="mt-1 text-xl font-black text-slate-900">
                   Passport Profile
@@ -1107,7 +1189,7 @@ export default function ExamRegistration({
               <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
                 <button
                   type="button"
-                  onClick={() => setStep(2)}
+                  onClick={() => goToStep(3)}
                   className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
                 >
                   Back
@@ -1115,7 +1197,7 @@ export default function ExamRegistration({
 
                 <button
                   type="button"
-                  onClick={continueToPayment}
+                  onClick={continueFromPassport}
                   className="rounded-xl bg-green-700 px-6 py-3 text-sm font-bold text-white hover:bg-green-800"
                 >
                   Continue to Payment
@@ -1124,19 +1206,18 @@ export default function ExamRegistration({
             </div>
           )}
 
-          {/* STEP 4 */}
-          {step === 4 && (
+          {/* STEP 5 */}
+          {step === 5 && (
             <div className="exam-section exam-section-card">
               <div className="exam-section-title">
                 <p className="text-xs font-bold uppercase tracking-wider text-green-700">
-                  Step 4
+                  Step 5
                 </p>
                 <h2 className="mt-1 text-xl font-black text-slate-900">
-                  Payment & Registration
+                  Payment Details
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
-                  Record the registration fee and complete the PWS registration
-                  record.
+                  Record the registration amount and payment information before confirmation.
                 </p>
               </div>
 
@@ -1176,6 +1257,41 @@ export default function ExamRegistration({
                     placeholder="Additional registration information..."
                   />
                 </div>
+              </div>
+
+              <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+                <button
+                  type="button"
+                  onClick={() => goToStep(4)}
+                  className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                >
+                  Back to Passport
+                </button>
+
+                <button
+                  type="button"
+                  onClick={continueFromPayment}
+                  className="rounded-xl bg-green-700 px-6 py-3 text-sm font-bold text-white hover:bg-green-800"
+                >
+                  Continue to Confirmation
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 6 */}
+          {step === 6 && (
+            <div className="exam-section exam-section-card">
+              <div className="exam-section-title">
+                <p className="text-xs font-bold uppercase tracking-wider text-green-700">
+                  Step 6
+                </p>
+                <h2 className="mt-1 text-xl font-black text-slate-900">
+                  Confirm Registration
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Review the complete registration before submitting it.
+                </p>
               </div>
 
               <div className="mt-6 rounded-2xl bg-slate-50 p-5">
@@ -1229,25 +1345,28 @@ export default function ExamRegistration({
                 </div>
               </div>
 
+
+
               <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
                 <button
                   type="button"
-                  onClick={() => goToStep(3)}
+                  onClick={() => goToStep(5)}
                   className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
                 >
-                  Back
+                  Back to Payment
                 </button>
 
                 <button
                   type="submit"
                   disabled={saving}
-                  className="rounded-xl bg-green-700 px-7 py-3 text-sm font-black text-white shadow-sm hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-xl bg-green-700 px-6 py-3 text-sm font-bold text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {saving ? 'Registering...' : `Register ${examType} Candidate`}
+                  {saving ? 'Registering...' : `Confirm & Register ${examType} Candidate`}
                 </button>
               </div>
             </div>
           )}
+
         </form>
 
         {/* HISTORY */}
