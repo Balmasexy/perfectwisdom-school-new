@@ -27,7 +27,7 @@ import {
 } from 'lucide-react'
 import { browserSupportsWebAuthn, startAuthentication, startRegistration } from '@simplewebauthn/browser'
 import './App.css'
-import { apiRequest, setAuthToken } from './api'
+import { apiRequest, clearAuthToken, setAuthToken } from './api'
 import Payments from './Payments'
 import Admissions from './Admissions'
 import EntranceAdmissions from './EntranceAdmissions'
@@ -2195,7 +2195,16 @@ function Dashboard({
 }
 
 export default function App() {
-  const [page, setPage] = useState<Page>('landing')
+  const [page, setPage] = useState<Page>(() => {
+    try {
+      return localStorage.getItem('perfect-wisdom-school-token')
+        ? 'dashboard'
+        : 'landing'
+    } catch {
+      return 'landing'
+    }
+  })
+
   const [role, setRole] = useState<Role>(() => {
     try {
       return getSavedRole()
@@ -2237,7 +2246,10 @@ export default function App() {
   return (
     <Dashboard
       role={role}
-      onSignOut={() => setPage('login')}
+      onSignOut={() => {
+        clearAuthToken()
+        setPage('login')
+      }}
     />
   )
 }

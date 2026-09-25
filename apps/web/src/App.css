@@ -3279,3 +3279,60 @@ button {
     scrollbar-width: thin;
   }
 }
+
+
+/* PWS DASHBOARD SCROLL + MOBILE BACKGROUND FIX */
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+html,
+body {
+  margin: 0;
+  background: #f5f8fc;
+}
+
+body {
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+  background: #f5f8fc;
+}
+
+.dashboard-shell {
+  min-height: 100vh !important;
+  background: #f5f8fc !important;
+  overflow-x: hidden;
+}
+
+.dashboard-shell .dashboard-main {
+  min-height: 100vh !important;
+  background: #f5f8fc !important;
+}
+
+.dashboard-shell .dashboard-content {
+  min-height: calc(100vh - 74px);
+  box-sizing: border-box;
+  background: #f5f8fc;
+}
+
+.management-page {
+  min-height: calc(100vh - 74px);
+  box-sizing: border-box;
+}
+
+@media (max-width: 800px) {
+  .dashboard-shell,
+  .dashboard-shell .dashboard-main,
+  .dashboard-shell .dashboard-content {
+    min-height: 100vh !important;
+  }
+
+  .dashboard-shell .dashboard-content {
+    padding-bottom: 40px;
+  }
+}
