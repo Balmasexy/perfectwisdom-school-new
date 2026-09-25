@@ -238,7 +238,18 @@ export async function examRegistrationRoutes(app: FastifyInstance) {
 
       if (body.studentId) {
         const studentCheck = await db.execute(sql`
-          SELECT id
+          SELECT
+            id,
+            student_id,
+            first_name,
+            last_name,
+            other_name,
+            phone_number,
+            date_of_birth,
+            gender,
+            branch_id,
+            parent_id,
+            class_id
           FROM students
           WHERE id = ${body.studentId}::uuid
           LIMIT 1
@@ -254,6 +265,33 @@ export async function examRegistrationRoutes(app: FastifyInstance) {
         if (!studentRows.length) {
           return reply.code(400).send({
             error: 'Selected student was not found',
+          })
+        }
+
+        const duplicateCheck = await db.execute(sql`
+          SELECT candidate_id
+          FROM exam_registrations
+          WHERE student_id = ${body.studentId}::uuid
+            AND exam_type = ${examType}
+            AND exam_year = ${examYear}
+            AND status <> 'CANCELLED'
+          LIMIT 1
+        `)
+
+        const duplicateRows =
+          (
+            duplicateCheck as unknown as {
+              rows: Array<{ candidate_id: string }>
+            }
+          ).rows
+
+        const duplicate = duplicateRows[0]
+
+        if (duplicate) {
+          return reply.code(409).send({
+            error:
+              `${examType} registration already exists for this student ` +
+              `for ${examYear} (${duplicate.candidate_id}).`,
           })
         }
       }
@@ -353,8 +391,10 @@ export async function examRegistrationRoutes(app: FastifyInstance) {
       const rows =
         (result as unknown as { rows: unknown[] }).rows
 
+      const registration = rows[0]
+
       return reply.code(201).send({
-        registration: rows[0],
+        registration,
       })
     },
   )
