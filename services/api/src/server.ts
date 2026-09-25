@@ -14,12 +14,14 @@ import { studentRoutes } from './routes/students.js'
 import { classRoutes } from './routes/classes.js'
 import { admissionsRoutes } from './routes/admissions.js'
 import { reportRoutes } from './routes/reports.js'
+import { settingsRoutes } from './routes/settings.js'
 import { ensureAccountIdSchema } from './db/account-id-migration.js'
 import { ensureJambRegistrationSchema } from './db/jamb-migration.js'
 import { ensureExamRegistrationSchema } from './db/exam-registration-migration.js'
 import { ensureStudentSchema } from './db/student-migration.js'
 import { ensureStudentClassSchema } from './db/student-class-migration.js'
 import { ensureAdmissionSchema } from './db/admission-migration.js'
+import { ensureSettingsSchema } from './db/settings-migration.js'
 
 dotenv.config()
 
@@ -29,6 +31,7 @@ await ensureExamRegistrationSchema()
 await ensureStudentSchema()
 await ensureStudentClassSchema()
 await ensureAdmissionSchema()
+await ensureSettingsSchema()
 
 
 const app = Fastify({
@@ -56,6 +59,7 @@ await app.register(parentRoutes)
 await app.register(classRoutes)
 await app.register(admissionsRoutes)
 await app.register(reportRoutes)
+await app.register(settingsRoutes)
 
 app.get('/health', async () => {
   return {

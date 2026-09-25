@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { apiRequest } from './api'
 import {
   Activity,
   CheckCircle2,
@@ -15,6 +16,11 @@ import {
   Baby,
   BarChart3,
   Clock3,
+  CalendarDays,
+  CalendarPlus,
+  AlertCircle,
+  Loader2,
+  Plus,
 } from 'lucide-react'
 
 type ModuleWorkspaceProps = {
@@ -180,6 +186,489 @@ const modules: Record<string, ModuleConfig> = {
 }
 
 
+
+
+type AcademicSessionRecord = {
+  id: string
+  name: string
+  startDate?: string | null
+  endDate?: string | null
+  active: boolean
+  activeTerm?: string | null
+}
+
+function AcademicSessionWorkspace({
+  role,
+}: {
+  role: 'Admin' | 'Staff' | 'Parent'
+}) {
+  const [sessions, setSessions] = useState<AcademicSessionRecord[]>([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [updating, setUpdating] = useState<string | null>(null)
+  const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
+
+  const [form, setForm] = useState({
+    name: '',
+    startDate: '',
+    endDate: '',
+    active: true,
+    activeTerm: 'First Term',
+  })
+
+  const canEdit = role === 'Admin'
+
+  async function loadSessions() {
+    setLoading(true)
+    setError('')
+
+    try {
+      const data = await apiRequest<AcademicSessionRecord[]>(
+        '/settings/sessions'
+      )
+      setSessions(Array.isArray(data) ? data : [])
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Unable to load academic sessions.'
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    void loadSessions()
+  }, [])
+
+  function updateForm(
+    field: 'name' | 'startDate' | 'endDate' | 'activeTerm',
+    value: string
+  ) {
+    setForm((current) => ({
+      ...current,
+      [field]: value,
+    }))
+  }
+
+  async function createSession(
+    event: React.FormEvent<HTMLFormElement>
+  ) {
+    event.preventDefault()
+
+    if (!canEdit) {
+      setError('Only an administrator can manage academic sessions.')
+      return
+    }
+
+    setError('')
+    setMessage('')
+
+    if (!form.name.trim()) {
+      setError('Please enter an academic session name.')
+      return
+    }
+
+    if (
+      form.startDate &&
+      form.endDate &&
+      form.endDate < form.startDate
+    ) {
+      setError('End date cannot be earlier than the start date.')
+      return
+    }
+
+    setSaving(true)
+
+    try {
+      await apiRequest('/settings/sessions', {
+        method: 'POST',
+        body: {
+          name: form.name.trim(),
+          startDate: form.startDate || null,
+          endDate: form.endDate || null,
+          active: form.active,
+          activeTerm: form.activeTerm,
+        },
+      })
+
+      setForm({
+        name: '',
+        startDate: '',
+        endDate: '',
+        active: false,
+        activeTerm: 'First Term',
+      })
+
+      setMessage('Academic session created successfully.')
+      await loadSessions()
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Unable to create academic session.'
+      )
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function updateSession(
+    id: string,
+    body: { active?: boolean; activeTerm?: string }
+  ) {
+    if (!canEdit) {
+      setError('Only an administrator can manage academic sessions.')
+      return
+    }
+
+    setError('')
+    setMessage('')
+    setUpdating(id)
+
+    try {
+      await apiRequest(`/settings/sessions/${id}`, {
+        method: 'PATCH',
+        body,
+      })
+
+      setMessage(
+        body.active
+          ? 'Academic session is now active.'
+          : 'Academic session updated successfully.'
+      )
+
+      await loadSessions()
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Unable to update academic session.'
+      )
+    } finally {
+      setUpdating(null)
+    }
+  }
+
+  const activeSession = sessions.find((session) => session.active)
+
+  return (
+    <section className="academic-session-workspace">
+      <div className="academic-session-hero">
+        <div>
+          <span className="module-eyebrow">{role} Workspace</span>
+          <h1>Academic Session</h1>
+          <p>
+            Manage academic sessions, terms and the school&apos;s
+            current academic period.
+          </p>
+        </div>
+
+        <div className="academic-session-hero-icon">
+          <CalendarDays size={24} />
+        </div>
+      </div>
+
+      {error && (
+        <div
+          className="academic-session-alert academic-session-alert-error"
+          role="alert"
+        >
+          <AlertCircle size={18} />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {message && (
+        <div
+          className="academic-session-alert academic-session-alert-success"
+          role="status"
+        >
+          <CheckCircle2 size={18} />
+          <span>{message}</span>
+        </div>
+      )}
+
+      <div className="academic-session-current">
+        <div>
+          <span className="academic-session-label">
+            CURRENT ACTIVE SESSION
+          </span>
+
+          {activeSession ? (
+            <>
+              <h2>{activeSession.name}</h2>
+              <p>
+                {activeSession.activeTerm || 'First Term'}
+                {activeSession.startDate
+                  ? ` • Starts ${new Date(
+                      activeSession.startDate
+                    ).toLocaleDateString()}`
+                  : ''}
+                {activeSession.endDate
+                  ? ` • Ends ${new Date(
+                      activeSession.endDate
+                    ).toLocaleDateString()}`
+                  : ''}
+              </p>
+            </>
+          ) : (
+            <>
+              <h2>No active session</h2>
+              <p>Create a session and mark it as active.</p>
+            </>
+          )}
+        </div>
+
+        <div className="academic-session-current-badge">
+          <CheckCircle2 size={18} />
+          {activeSession ? 'Active' : 'Not configured'}
+        </div>
+      </div>
+
+      {canEdit && (
+        <form
+          className="academic-session-create"
+          onSubmit={createSession}
+        >
+          <div className="academic-session-section-heading">
+            <div>
+              <span className="module-eyebrow">
+                SESSION MANAGEMENT
+              </span>
+              <h2>Create Academic Session</h2>
+            </div>
+            <CalendarPlus size={22} />
+          </div>
+
+          <div className="academic-session-form-grid">
+            <label>
+              <span>Academic Session</span>
+              <input
+                value={form.name}
+                onChange={(event) =>
+                  updateForm('name', event.target.value)
+                }
+                placeholder="e.g. 2026/2027"
+                required
+              />
+            </label>
+
+            <label>
+              <span>Active Term</span>
+              <select
+                value={form.activeTerm}
+                onChange={(event) =>
+                  updateForm('activeTerm', event.target.value)
+                }
+              >
+                <option>First Term</option>
+                <option>Second Term</option>
+                <option>Third Term</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Start Date</span>
+              <input
+                type="date"
+                value={form.startDate}
+                onChange={(event) =>
+                  updateForm('startDate', event.target.value)
+                }
+              />
+            </label>
+
+            <label>
+              <span>End Date</span>
+              <input
+                type="date"
+                value={form.endDate}
+                onChange={(event) =>
+                  updateForm('endDate', event.target.value)
+                }
+              />
+            </label>
+          </div>
+
+          <label className="academic-session-active-option">
+            <input
+              type="checkbox"
+              checked={form.active}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  active: event.target.checked,
+                }))
+              }
+            />
+            <span>
+              <strong>Make this the active session</strong>
+              <small>
+                The active session becomes the school&apos;s
+                current academic period.
+              </small>
+            </span>
+          </label>
+
+          <button
+            type="submit"
+            className="academic-session-primary-button"
+            disabled={saving}
+          >
+            <Plus size={18} />
+            {saving
+              ? 'Creating Session...'
+              : 'Create Academic Session'}
+          </button>
+        </form>
+      )}
+
+      <div className="academic-session-list">
+        <div className="academic-session-section-heading">
+          <div>
+            <span className="module-eyebrow">
+              ACADEMIC CALENDAR
+            </span>
+            <h2>Academic Sessions</h2>
+          </div>
+
+          <span className="academic-session-count">
+            {sessions.length}{' '}
+            {sessions.length === 1 ? 'session' : 'sessions'}
+          </span>
+        </div>
+
+        {loading ? (
+          <div className="academic-session-empty">
+            <Loader2
+              size={22}
+              className="academic-session-spin"
+            />
+            <span>Loading academic sessions...</span>
+          </div>
+        ) : sessions.length === 0 ? (
+          <div className="academic-session-empty">
+            <CalendarDays size={26} />
+            <strong>No academic sessions yet</strong>
+            <span>Create the first academic session above.</span>
+          </div>
+        ) : (
+          <div className="academic-session-cards">
+            {sessions.map((session) => (
+              <article
+                key={session.id}
+                className={`academic-session-card ${
+                  session.active ? 'is-active' : ''
+                }`}
+              >
+                <div className="academic-session-card-top">
+                  <div>
+                    <div className="academic-session-title-row">
+                      <h3>{session.name}</h3>
+
+                      {session.active && (
+                        <span className="academic-session-status">
+                          <CheckCircle2 size={14} />
+                          Active
+                        </span>
+                      )}
+                    </div>
+
+                    <p>
+                      {session.startDate
+                        ? new Date(
+                            session.startDate
+                          ).toLocaleDateString()
+                        : 'Start date not set'}
+                      {' — '}
+                      {session.endDate
+                        ? new Date(
+                            session.endDate
+                          ).toLocaleDateString()
+                        : 'End date not set'}
+                    </p>
+                  </div>
+
+                  <GraduationCap size={24} />
+                </div>
+
+                <div className="academic-session-card-details">
+                  <div>
+                    <span>Current Term</span>
+                    <strong>
+                      {session.activeTerm || 'First Term'}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Status</span>
+                    <strong>
+                      {session.active ? 'Active' : 'Inactive'}
+                    </strong>
+                  </div>
+                </div>
+
+                {canEdit && (
+                  <div className="academic-session-card-actions">
+                    <label>
+                      <span>Change Term</span>
+                      <select
+                        value={
+                          session.activeTerm || 'First Term'
+                        }
+                        disabled={updating === session.id}
+                        onChange={(event) =>
+                          updateSession(session.id, {
+                            activeTerm: event.target.value,
+                          })
+                        }
+                      >
+                        <option>First Term</option>
+                        <option>Second Term</option>
+                        <option>Third Term</option>
+                      </select>
+                    </label>
+
+                    {!session.active && (
+                      <button
+                        type="button"
+                        className="academic-session-set-active"
+                        disabled={updating === session.id}
+                        onClick={() =>
+                          updateSession(session.id, {
+                            active: true,
+                          })
+                        }
+                      >
+                        {updating === session.id ? (
+                          <>
+                            <Loader2
+                              size={16}
+                              className="academic-session-spin"
+                            />
+                            Updating...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 size={16} />
+                            Set Active
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
 
 function ReportsWorkspace({ role }: { role: 'Admin' | 'Staff' | 'Parent' }) {
   const [report, setReport] = useState<'attendance' | 'academic' | 'financial'>('attendance')
@@ -605,6 +1094,10 @@ export default function ModuleWorkspace({
   section,
 }: ModuleWorkspaceProps) {
   const config = modules[section]
+
+  if (section === 'Academic Session') {
+    return <AcademicSessionWorkspace role={role} />
+  }
 
   if (section === 'Attendance') {
     return <AttendanceWorkspace role={role} />

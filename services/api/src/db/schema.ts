@@ -165,6 +165,7 @@ export const students = pgTable(
     dateOfBirth: date('date_of_birth'),
     gender: genderEnum('gender'),
     address: text('address'),
+    passportPhoto: text('passport_photo'),
     branchId: uuid('branch_id').references(() => branches.id, { onDelete: 'set null' }),
     parentId: uuid('parent_id').references(() => parents.id, { onDelete: 'set null' }),
     classId: uuid('class_id').references(() => classes.id, { onDelete: 'set null' }),
