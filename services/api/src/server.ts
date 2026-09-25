@@ -13,6 +13,7 @@ import { parentRoutes } from './routes/parents.js'
 import { studentRoutes } from './routes/students.js'
 import { classRoutes } from './routes/classes.js'
 import { admissionsRoutes } from './routes/admissions.js'
+import { reportRoutes } from './routes/reports.js'
 import { ensureAccountIdSchema } from './db/account-id-migration.js'
 import { ensureJambRegistrationSchema } from './db/jamb-migration.js'
 import { ensureExamRegistrationSchema } from './db/exam-registration-migration.js'
@@ -54,6 +55,7 @@ await app.register(parentRoutes)
   await app.register(studentRoutes)
 await app.register(classRoutes)
 await app.register(admissionsRoutes)
+await app.register(reportRoutes)
 
 app.get('/health', async () => {
   return {
