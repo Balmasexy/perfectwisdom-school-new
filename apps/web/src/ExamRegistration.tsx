@@ -1,5 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
+import {
+  Camera,
+  CheckCircle2,
+  ClipboardCheck,
+  CreditCard,
+  FileText,
+  GraduationCap,
+  UserRound,
+} from 'lucide-react'
 import { apiRequest } from './api'
 
 type ExamType = 'WAEC' | 'NECO'
@@ -77,68 +86,89 @@ const createInitialForm = (): FormState => ({
 })
 
 const inputClass =
-  'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-100'
+  'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition focus:border-green-600 focus:ring-4 focus:ring-green-50'
 
 const labelClass =
-  'mb-1.5 block text-sm font-medium text-slate-700'
+  'mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-600'
+
+const sectionSubjects: Record<ExamType, string[]> = {
+  WAEC: [
+    'English Language',
+    'Mathematics',
+    'Biology',
+    'Chemistry',
+    'Physics',
+    'Economics',
+    'Government',
+    'Literature-in-English',
+    'Geography',
+    'Commerce',
+    'Financial Accounting',
+    'Agricultural Science',
+    'Civic Education',
+    'Christian Religious Studies',
+    'Islamic Studies',
+    'Computer Studies',
+    'Data Processing',
+    'Further Mathematics',
+  ],
+  NECO: [
+    'English Language',
+    'Mathematics',
+    'Biology',
+    'Chemistry',
+    'Physics',
+    'Economics',
+    'Government',
+    'Literature-in-English',
+    'Geography',
+    'Commerce',
+    'Financial Accounting',
+    'Agricultural Science',
+    'Civic Education',
+    'Christian Religious Studies',
+    'Islamic Religious Studies',
+    'Computer Studies',
+    'Data Processing',
+    'Further Mathematics',
+  ],
+}
+
+const steps = [
+  { id: 1, label: 'Candidate Profile', icon: UserRound },
+  { id: 2, label: 'Examination', icon: GraduationCap },
+  { id: 3, label: 'Passport', icon: Camera },
+  { id: 4, label: 'Payment', icon: CreditCard },
+]
 
 export default function ExamRegistration({
   examType,
 }: {
   examType: ExamType
 }) {
-  const [form, setForm] = useState<FormState>(
-    createInitialForm(),
-  )
-
+  const [form, setForm] = useState<FormState>(createInitialForm())
   const [branches, setBranches] = useState<Branch[]>([])
-  const [registrations, setRegistrations] =
-    useState<Registration[]>([])
+  const [registrations, setRegistrations] = useState<Registration[]>([])
+  const [statusFilter, setStatusFilter] = useState('')
+  const [yearFilter, setYearFilter] = useState('')
+  const [step, setStep] = useState(1)
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([])
+  const [passportPreview, setPassportPreview] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
-  const [statusFilter, setStatusFilter] =
-    useState('')
+  const title = examType === 'WAEC' ? 'WAEC Registration Centre' : 'NECO Registration Centre'
+  const accent = examType === 'WAEC' ? 'WAEC' : 'NECO'
 
-  const [yearFilter, setYearFilter] =
-    useState('')
-
-  const [loading, setLoading] =
-    useState(true)
-
-  const [saving, setSaving] =
-    useState(false)
-
-  const [error, setError] =
-    useState('')
-
-  const [success, setSuccess] =
-    useState('')
-
-  const title =
-    examType === 'WAEC'
-      ? 'WAEC Registration Centre'
-      : 'NECO Registration Centre'
-
-  const description =
-    examType === 'WAEC'
-      ? 'Manage WAEC candidate registration, subjects, payments and registration history.'
-      : 'Manage NECO candidate registration, subjects, payments and registration history.'
-
-  const updateField = (
-    field: keyof FormState,
-    value: string,
-  ) => {
-    setForm((current) => ({
-      ...current,
-      [field]: value,
-    }))
+  const updateField = (field: keyof FormState, value: string) => {
+    setForm((current) => ({ ...current, [field]: value }))
   }
 
   const loadBranches = async () => {
     try {
-      const data =
-        await apiRequest<Branch[]>('/branches')
-
-      setBranches(data)
+      setBranches(await apiRequest<Branch[]>('/branches'))
     } catch {
       setBranches([])
     }
@@ -146,27 +176,17 @@ export default function ExamRegistration({
 
   const loadRegistrations = async () => {
     setLoading(true)
-    setError('')
-
     try {
       const params = new URLSearchParams()
-
       params.set('examType', examType)
+      if (statusFilter) params.set('status', statusFilter)
+      if (yearFilter) params.set('examYear', yearFilter)
 
-      if (statusFilter) {
-        params.set('status', statusFilter)
-      }
-
-      if (yearFilter) {
-        params.set('examYear', yearFilter)
-      }
-
-      const data =
+      setRegistrations(
         await apiRequest<Registration[]>(
           `/exam-registrations?${params.toString()}`,
-        )
-
-      setRegistrations(data)
+        ),
+      )
     } catch (err) {
       setError(
         err instanceof Error
@@ -186,58 +206,100 @@ export default function ExamRegistration({
     void loadRegistrations()
   }, [examType, statusFilter, yearFilter])
 
-  const submitRegistration = async (
-    event: FormEvent<HTMLFormElement>,
-  ) => {
-    event.preventDefault()
+  const toggleSubject = (subject: string) => {
+    setSelectedSubjects((current) =>
+      current.includes(subject)
+        ? current.filter((item) => item !== subject)
+        : [...current, subject],
+    )
+  }
 
+  const handlePassport = (file?: File) => {
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      setError('Passport must be an image file.')
+      return
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setError('Passport image must not exceed 2MB.')
+      return
+    }
+
+    setError('')
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      setPassportPreview(String(reader.result || ''))
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const submitRegistration = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
     setSaving(true)
     setError('')
     setSuccess('')
 
-    if (
-      form.ninLast4 &&
-      !/^\d{4}$/.test(form.ninLast4)
-    ) {
-      setError(
-        'NIN must contain exactly the last 4 digits.',
-      )
+    if (!form.firstName.trim() || !form.lastName.trim()) {
+      setError('First name and last name are required.')
+      setStep(1)
       setSaving(false)
       return
     }
 
-    if (
-      !form.firstName.trim() ||
-      !form.lastName.trim()
-    ) {
-      setError(
-        'First name and last name are required.',
-      )
+    if (form.ninLast4 && !/^\d{4}$/.test(form.ninLast4)) {
+      setError('NIN must contain exactly the last 4 digits.')
+      setStep(1)
+      setSaving(false)
+      return
+    }
+
+    if (!form.phoneNumber.trim()) {
+      setError('Phone number is required.')
+      setStep(1)
+      setSaving(false)
+      return
+    }
+
+    if (!form.examYear) {
+      setError('Examination year is required.')
+      setStep(2)
+      setSaving(false)
+      return
+    }
+
+    if (!selectedSubjects.length) {
+      setError(`Select at least one ${examType} subject.`)
+      setStep(2)
       setSaving(false)
       return
     }
 
     try {
-      const data =
-        await apiRequest<{
-          registration: Registration
-        }>('/exam-registrations', {
+      const data = await apiRequest<{ registration: Registration }>(
+        '/exam-registrations',
+        {
           method: 'POST',
           body: {
             ...form,
             examType,
             examYear: Number(form.examYear),
-            amount: form.amount
-              ? Number(form.amount)
-              : 0,
+            subjects: selectedSubjects.join(', '),
+            amount: form.amount ? Number(form.amount) : 0,
           },
-        })
+        },
+      )
 
       setSuccess(
         `${examType} candidate ${data.registration.candidate_id} was registered successfully.`,
       )
 
       setForm(createInitialForm())
+      setSelectedSubjects([])
+      setPassportPreview('')
+      setStep(1)
 
       await loadRegistrations()
     } catch (err) {
@@ -251,27 +313,28 @@ export default function ExamRegistration({
     }
   }
 
-  const statusBadge = (
-    status: string,
-  ) => {
+  const totalAmount = useMemo(
+    () =>
+      registrations.reduce(
+        (sum, item) => sum + Number(item.amount || 0),
+        0,
+      ),
+    [registrations],
+  )
+
+  const statusBadge = (status: string) => {
     const styles: Record<string, string> = {
-      DRAFT:
-        'bg-slate-100 text-slate-700',
-      IN_PROGRESS:
-        'bg-amber-100 text-amber-800',
-      SUBMITTED:
-        'bg-blue-100 text-blue-800',
-      COMPLETED:
-        'bg-green-100 text-green-800',
-      CANCELLED:
-        'bg-red-100 text-red-800',
+      DRAFT: 'bg-slate-100 text-slate-700',
+      IN_PROGRESS: 'bg-amber-100 text-amber-800',
+      SUBMITTED: 'bg-blue-100 text-blue-800',
+      COMPLETED: 'bg-green-100 text-green-800',
+      CANCELLED: 'bg-red-100 text-red-800',
     }
 
     return (
       <span
-        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-          styles[status] ||
-          'bg-slate-100 text-slate-700'
+        className={`rounded-full px-2.5 py-1 text-xs font-bold ${
+          styles[status] || 'bg-slate-100 text-slate-700'
         }`}
       >
         {status.replaceAll('_', ' ')}
@@ -279,555 +342,639 @@ export default function ExamRegistration({
     )
   }
 
-  const totalAmount = useMemo(
-    () =>
-      registrations.reduce(
-        (sum, item) =>
-          sum + Number(item.amount || 0),
-        0,
-      ),
-    [registrations],
-  )
-
   return (
-    <div className="relative isolate space-y-6 bg-slate-50/40 p-1 md:p-2">
-      <div className="mx-auto max-w-7xl space-y-6">
+    <div className="min-h-full bg-slate-50 p-2 md:p-5">
+      <div className="mx-auto max-w-7xl space-y-5">
 
-        <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        {/* HEADER */}
+        <header className="overflow-hidden rounded-3xl bg-gradient-to-br from-green-800 via-green-700 to-emerald-600 p-6 text-white shadow-lg">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="inline-flex w-fit items-center rounded-full bg-green-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-green-700">
+              <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-green-100">
+                <ClipboardCheck size={16} />
                 Perfect Wisdom School
-              </p>
+              </div>
 
-              <h1 className="mt-2 text-2xl font-bold text-slate-900">
+              <h1 className="text-2xl font-black md:text-3xl">
                 {title}
               </h1>
 
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-                {description}
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-green-50">
+                Complete candidate profiles, examination details,
+                subject selection, passport records and payment
+                information from one professional registration workspace.
               </p>
             </div>
 
-            <div className="max-w-md rounded-xl bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-800 ring-1 ring-amber-100">
-              Internal PWS workflow — this module records and
-              manages school registration information. It is
-              not a direct official {examType} API or portal
-              integration.
+            <div className="rounded-2xl bg-white/10 p-4 ring-1 ring-white/20 backdrop-blur">
+              <div className="text-xs font-bold uppercase tracking-wider text-green-100">
+                Examination
+              </div>
+              <div className="mt-1 text-2xl font-black">{accent}</div>
+              <div className="mt-1 text-xs text-green-100">
+                Internal PWS Registration Centre
+              </div>
             </div>
           </div>
+        </header>
+
+        {/* NOTICE */}
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+          <strong>Important:</strong> This is an internal PWS workflow for
+          recording and managing candidate registration information. It is
+          not a direct official {examType} API or official examination portal.
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        {/* SUMMARY */}
+        <div className="grid gap-3 sm:grid-cols-3">
           <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
               Candidates
             </p>
-            <strong className="mt-2 block text-2xl text-slate-900">
+            <p className="mt-2 text-2xl font-black text-slate-900">
               {registrations.length}
-            </strong>
+            </p>
           </div>
 
           <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
               Completed
             </p>
-            <strong className="mt-2 block text-2xl text-green-700">
-              {
-                registrations.filter(
-                  (item) =>
-                    item.status === 'COMPLETED',
-                ).length
-              }
-            </strong>
+            <p className="mt-2 text-2xl font-black text-green-700">
+              {registrations.filter((item) => item.status === 'COMPLETED').length}
+            </p>
           </div>
 
           <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
               Recorded Payments
             </p>
-            <strong className="mt-2 block text-2xl text-slate-900">
+            <p className="mt-2 text-2xl font-black text-slate-900">
               ₦{totalAmount.toLocaleString()}
-            </strong>
+            </p>
           </div>
         </div>
 
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-            {success}
+          <div className="rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 size={18} />
+              {success}
+            </div>
           </div>
         )}
 
-        <form
-          onSubmit={submitRegistration}
-          className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100"
-        >
-          <div className="mb-6">
-            <p className="text-xs font-bold uppercase tracking-wider text-green-700">
-              Candidate Registration
-            </p>
+        {/* REGISTRATION WORKSPACE */}
+        <form onSubmit={submitRegistration} className="rounded-3xl bg-white shadow-sm ring-1 ring-slate-100">
 
-            <h2 className="mt-1 text-lg font-bold text-slate-900">
-              New {examType} Candidate
-            </h2>
+          {/* STEPS */}
+          <div className="border-b border-slate-100 p-4 md:p-6">
+            <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+              {steps.map((item) => {
+                const Icon = item.icon
+                const active = step === item.id
+                const completed = step > item.id
 
-            <p className="mt-1 text-sm text-slate-500">
-              Enter accurate candidate information before
-              saving the registration.
-            </p>
-          </div>
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setStep(item.id)}
+                    className={`rounded-2xl p-3 text-left transition ${
+                      active
+                        ? 'bg-green-700 text-white shadow-sm'
+                        : completed
+                          ? 'bg-green-50 text-green-800'
+                          : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`flex h-9 w-9 items-center justify-center rounded-xl ${
+                          active
+                            ? 'bg-white/15'
+                            : completed
+                              ? 'bg-white'
+                              : 'bg-white'
+                        }`}
+                      >
+                        {completed ? <CheckCircle2 size={18} /> : <Icon size={18} />}
+                      </div>
 
-          <div className="mb-6 rounded-xl bg-slate-50 p-4">
-            <h3 className="mb-4 text-sm font-bold text-slate-900">
-              Candidate Information
-            </h3>
-
-            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-
-              <div>
-                <label className={labelClass}>
-                  Student ID
-                </label>
-
-                <input
-                  className={inputClass}
-                  value={form.studentId}
-                  onChange={(e) =>
-                    updateField(
-                      'studentId',
-                      e.target.value,
-                    )
-                  }
-                  placeholder="Optional PWS student UUID"
-                />
-              </div>
-
-              <div>
-                <label className={labelClass}>
-                  First Name *
-                </label>
-
-                <input
-                  className={inputClass}
-                  value={form.firstName}
-                  onChange={(e) =>
-                    updateField(
-                      'firstName',
-                      e.target.value,
-                    )
-                  }
-                  required
-                />
-              </div>
-
-              <div>
-                <label className={labelClass}>
-                  Last Name *
-                </label>
-
-                <input
-                  className={inputClass}
-                  value={form.lastName}
-                  onChange={(e) =>
-                    updateField(
-                      'lastName',
-                      e.target.value,
-                    )
-                  }
-                  required
-                />
-              </div>
-
-              <div>
-                <label className={labelClass}>
-                  Other Name
-                </label>
-
-                <input
-                  className={inputClass}
-                  value={form.otherName}
-                  onChange={(e) =>
-                    updateField(
-                      'otherName',
-                      e.target.value,
-                    )
-                  }
-                />
-              </div>
-
-              <div>
-                <label className={labelClass}>
-                  Phone Number *
-                </label>
-
-                <input
-                  className={inputClass}
-                  value={form.phoneNumber}
-                  onChange={(e) =>
-                    updateField(
-                      'phoneNumber',
-                      e.target.value,
-                    )
-                  }
-                  required
-                />
-              </div>
-
-              <div>
-                <label className={labelClass}>
-                  Email
-                </label>
-
-                <input
-                  type="email"
-                  className={inputClass}
-                  value={form.email}
-                  onChange={(e) =>
-                    updateField(
-                      'email',
-                      e.target.value,
-                    )
-                  }
-                />
-              </div>
-
-              <div>
-                <label className={labelClass}>
-                  Date of Birth
-                </label>
-
-                <input
-                  type="date"
-                  className={inputClass}
-                  value={form.dateOfBirth}
-                  onChange={(e) =>
-                    updateField(
-                      'dateOfBirth',
-                      e.target.value,
-                    )
-                  }
-                />
-              </div>
-
-              <div>
-                <label className={labelClass}>
-                  Gender
-                </label>
-
-                <select
-                  className={inputClass}
-                  value={form.gender}
-                  onChange={(e) =>
-                    updateField(
-                      'gender',
-                      e.target.value,
-                    )
-                  }
-                >
-                  <option value="">
-                    Select gender
-                  </option>
-                  <option value="MALE">
-                    Male
-                  </option>
-                  <option value="FEMALE">
-                    Female
-                  </option>
-                  <option value="OTHER">
-                    Other
-                  </option>
-                </select>
-              </div>
-
-              <div>
-                <label className={labelClass}>
-                  State of Origin
-                </label>
-
-                <input
-                  className={inputClass}
-                  value={form.stateOfOrigin}
-                  onChange={(e) =>
-                    updateField(
-                      'stateOfOrigin',
-                      e.target.value,
-                    )
-                  }
-                />
-              </div>
-
-              <div>
-                <label className={labelClass}>
-                  LGA
-                </label>
-
-                <input
-                  className={inputClass}
-                  value={form.lga}
-                  onChange={(e) =>
-                    updateField(
-                      'lga',
-                      e.target.value,
-                    )
-                  }
-                />
-              </div>
-
-              <div>
-                <label className={labelClass}>
-                  NIN Last 4 Digits
-                </label>
-
-                <input
-                  inputMode="numeric"
-                  maxLength={4}
-                  className={inputClass}
-                  value={form.ninLast4}
-                  onChange={(e) =>
-                    updateField(
-                      'ninLast4',
-                      e.target.value
-                        .replace(/\D/g, '')
-                        .slice(0, 4),
-                    )
-                  }
-                  placeholder="1234"
-                />
-              </div>
-
+                      <div>
+                        <div className="text-[10px] font-bold uppercase tracking-wider opacity-70">
+                          Step {item.id}
+                        </div>
+                        <div className="text-xs font-bold md:text-sm">
+                          {item.label}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                )
+              })}
             </div>
           </div>
 
-          <div className="mb-6 rounded-xl bg-slate-50 p-4">
-            <h3 className="mb-4 text-sm font-bold text-slate-900">
-              Examination Details
-            </h3>
-
-            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-
-              <div>
-                <label className={labelClass}>
-                  Exam Year *
-                </label>
-
-                <input
-                  type="number"
-                  min="2020"
-                  max="2100"
-                  className={inputClass}
-                  value={form.examYear}
-                  onChange={(e) =>
-                    updateField(
-                      'examYear',
-                      e.target.value,
-                    )
-                  }
-                  required
-                />
-              </div>
-
-              <div>
-                <label className={labelClass}>
-                  Registration Type *
-                </label>
-
-                <select
-                  className={inputClass}
-                  value={form.registrationType}
-                  onChange={(e) =>
-                    updateField(
-                      'registrationType',
-                      e.target.value,
-                    )
-                  }
-                >
-                  <option value="SCHOOL_CANDIDATE">
-                    School Candidate
-                  </option>
-                  <option value="PRIVATE_CANDIDATE">
-                    Private Candidate
-                  </option>
-                </select>
-              </div>
-
-              <div>
-                <label className={labelClass}>
-                  Examination Centre
-                </label>
-
-                <input
-                  className={inputClass}
-                  value={form.examinationCentre}
-                  onChange={(e) =>
-                    updateField(
-                      'examinationCentre',
-                      e.target.value,
-                    )
-                  }
-                  placeholder="Examination centre"
-                />
-              </div>
-
-              <div className="md:col-span-2 lg:col-span-3">
-                <label className={labelClass}>
-                  Subjects
-                </label>
-
-                <textarea
-                  rows={4}
-                  className={inputClass}
-                  value={form.subjects}
-                  onChange={(e) =>
-                    updateField(
-                      'subjects',
-                      e.target.value,
-                    )
-                  }
-                  placeholder="English Language, Mathematics, Biology, Chemistry..."
-                />
-
-                <p className="mt-1 text-xs text-slate-400">
-                  Separate subjects with commas.
+          {/* STEP 1 */}
+          {step === 1 && (
+            <div className="p-5 md:p-7">
+              <div className="mb-6">
+                <p className="text-xs font-bold uppercase tracking-wider text-green-700">
+                  Step 1
+                </p>
+                <h2 className="mt-1 text-xl font-black text-slate-900">
+                  Candidate Profile
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Enter the candidate's personal information and link the
+                  registration to an existing PWS student where applicable.
                 </p>
               </div>
 
-              <div>
-                <label className={labelClass}>
-                  PWS Branch
-                </label>
+              <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+                <div>
+                  <label className={labelClass}>PWS Student ID</label>
+                  <input
+                    className={inputClass}
+                    value={form.studentId}
+                    onChange={(e) => updateField('studentId', e.target.value)}
+                    placeholder="Optional student UUID"
+                  />
+                </div>
 
-                <select
-                  className={inputClass}
-                  value={form.branchId}
-                  onChange={(e) =>
-                    updateField(
-                      'branchId',
-                      e.target.value,
-                    )
-                  }
+                <div>
+                  <label className={labelClass}>First Name *</label>
+                  <input
+                    required
+                    className={inputClass}
+                    value={form.firstName}
+                    onChange={(e) => updateField('firstName', e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Last Name *</label>
+                  <input
+                    required
+                    className={inputClass}
+                    value={form.lastName}
+                    onChange={(e) => updateField('lastName', e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Other Name</label>
+                  <input
+                    className={inputClass}
+                    value={form.otherName}
+                    onChange={(e) => updateField('otherName', e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Phone Number *</label>
+                  <input
+                    required
+                    className={inputClass}
+                    value={form.phoneNumber}
+                    onChange={(e) => updateField('phoneNumber', e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Email Address</label>
+                  <input
+                    type="email"
+                    className={inputClass}
+                    value={form.email}
+                    onChange={(e) => updateField('email', e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Date of Birth</label>
+                  <input
+                    type="date"
+                    className={inputClass}
+                    value={form.dateOfBirth}
+                    onChange={(e) => updateField('dateOfBirth', e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Gender</label>
+                  <select
+                    className={inputClass}
+                    value={form.gender}
+                    onChange={(e) => updateField('gender', e.target.value)}
+                  >
+                    <option value="">Select gender</option>
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className={labelClass}>State of Origin</label>
+                  <input
+                    className={inputClass}
+                    value={form.stateOfOrigin}
+                    onChange={(e) => updateField('stateOfOrigin', e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Local Government Area</label>
+                  <input
+                    className={inputClass}
+                    value={form.lga}
+                    onChange={(e) => updateField('lga', e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>NIN Last 4 Digits</label>
+                  <input
+                    inputMode="numeric"
+                    maxLength={4}
+                    className={inputClass}
+                    value={form.ninLast4}
+                    onChange={(e) =>
+                      updateField(
+                        'ninLast4',
+                        e.target.value.replace(/\D/g, '').slice(0, 4),
+                      )
+                    }
+                    placeholder="1234"
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>PWS Branch</label>
+                  <select
+                    className={inputClass}
+                    value={form.branchId}
+                    onChange={(e) => updateField('branchId', e.target.value)}
+                  >
+                    <option value="">Select branch</option>
+                    {branches.map((branch) => (
+                      <option key={branch.id} value={branch.id}>
+                        {branch.code ? `${branch.code} — ` : ''}
+                        {branch.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="mt-7 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className="rounded-xl bg-green-700 px-6 py-3 text-sm font-bold text-white hover:bg-green-800"
                 >
-                  <option value="">
-                    Select branch
-                  </option>
-
-                  {branches.map((branch) => (
-                    <option
-                      key={branch.id}
-                      value={branch.id}
-                    >
-                      {branch.code
-                        ? `${branch.code} — `
-                        : ''}
-                      {branch.name}
-                    </option>
-                  ))}
-                </select>
+                  Continue to Examination
+                </button>
               </div>
-
             </div>
-          </div>
+          )}
 
-          <div className="mb-6 rounded-xl bg-slate-50 p-4">
-            <h3 className="mb-4 text-sm font-bold text-slate-900">
-              Payment & Records
-            </h3>
-
-            <div className="grid gap-5 md:grid-cols-2">
-
-              <div>
-                <label className={labelClass}>
-                  Amount
-                </label>
-
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  className={inputClass}
-                  value={form.amount}
-                  onChange={(e) =>
-                    updateField(
-                      'amount',
-                      e.target.value,
-                    )
-                  }
-                  placeholder="0.00"
-                />
+          {/* STEP 2 */}
+          {step === 2 && (
+            <div className="p-5 md:p-7">
+              <div className="mb-6">
+                <p className="text-xs font-bold uppercase tracking-wider text-green-700">
+                  Step 2
+                </p>
+                <h2 className="mt-1 text-xl font-black text-slate-900">
+                  Examination Details
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Configure the examination year, registration type, centre and
+                  candidate subjects.
+                </p>
               </div>
 
-              <div>
-                <label className={labelClass}>
-                  Payment Reference
-                </label>
+              <div className="grid gap-5 md:grid-cols-3">
+                <div>
+                  <label className={labelClass}>Examination Year *</label>
+                  <input
+                    required
+                    type="number"
+                    min="2020"
+                    max="2100"
+                    className={inputClass}
+                    value={form.examYear}
+                    onChange={(e) => updateField('examYear', e.target.value)}
+                  />
+                </div>
 
-                <input
-                  className={inputClass}
-                  value={form.paymentReference}
-                  onChange={(e) =>
-                    updateField(
-                      'paymentReference',
-                      e.target.value,
-                    )
-                  }
-                  placeholder="Payment reference"
-                />
+                <div>
+                  <label className={labelClass}>Registration Type *</label>
+                  <select
+                    className={inputClass}
+                    value={form.registrationType}
+                    onChange={(e) =>
+                      updateField('registrationType', e.target.value)
+                    }
+                  >
+                    <option value="SCHOOL_CANDIDATE">School Candidate</option>
+                    <option value="PRIVATE_CANDIDATE">Private Candidate</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Examination Centre</label>
+                  <input
+                    className={inputClass}
+                    value={form.examinationCentre}
+                    onChange={(e) =>
+                      updateField('examinationCentre', e.target.value)
+                    }
+                    placeholder="Centre name / code"
+                  />
+                </div>
               </div>
 
-              <div className="md:col-span-2">
-                <label className={labelClass}>
-                  Notes
-                </label>
+              <div className="mt-7">
+                <div className="mb-3 flex items-end justify-between">
+                  <div>
+                    <h3 className="text-sm font-black text-slate-900">
+                      Subject Selection
+                    </h3>
+                    <p className="mt-1 text-xs text-slate-500">
+                      Select the subjects being recorded for this candidate.
+                    </p>
+                  </div>
 
-                <textarea
-                  rows={3}
-                  className={inputClass}
-                  value={form.notes}
-                  onChange={(e) =>
-                    updateField(
-                      'notes',
-                      e.target.value,
+                  <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700">
+                    {selectedSubjects.length} selected
+                  </span>
+                </div>
+
+                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {sectionSubjects[examType].map((subject) => {
+                    const selected = selectedSubjects.includes(subject)
+
+                    return (
+                      <button
+                        key={subject}
+                        type="button"
+                        onClick={() => toggleSubject(subject)}
+                        className={`flex items-center justify-between rounded-xl border p-3 text-left text-sm font-semibold transition ${
+                          selected
+                            ? 'border-green-600 bg-green-50 text-green-800'
+                            : 'border-slate-200 bg-white text-slate-700 hover:border-green-300 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>{subject}</span>
+                        {selected && <CheckCircle2 size={17} />}
+                      </button>
                     )
-                  }
-                  placeholder="Additional registration notes"
-                />
+                  })}
+                </div>
               </div>
 
+              <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                >
+                  Back
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!selectedSubjects.length) {
+                      setError(`Select at least one ${examType} subject.`)
+                      return
+                    }
+                    setError('')
+                    setStep(3)
+                  }}
+                  className="rounded-xl bg-green-700 px-6 py-3 text-sm font-bold text-white hover:bg-green-800"
+                >
+                  Continue to Passport
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-xl bg-green-700 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {saving
-                ? 'Saving...'
-                : `Register ${examType} Candidate`}
-            </button>
-          </div>
+          {/* STEP 3 */}
+          {step === 3 && (
+            <div className="p-5 md:p-7">
+              <div className="mb-6">
+                <p className="text-xs font-bold uppercase tracking-wider text-green-700">
+                  Step 3
+                </p>
+                <h2 className="mt-1 text-xl font-black text-slate-900">
+                  Passport Profile
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Add the candidate passport image for registration review.
+                </p>
+              </div>
+
+              <div className="grid gap-7 md:grid-cols-[220px_1fr]">
+                <div className="flex justify-center">
+                  <div className="relative flex h-56 w-44 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50">
+                    {passportPreview ? (
+                      <img
+                        src={passportPreview}
+                        alt="Candidate passport preview"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="text-center text-slate-400">
+                        <Camera className="mx-auto mb-2" size={34} />
+                        <p className="text-xs font-semibold">Passport Preview</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Passport Photograph</label>
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handlePassport(e.target.files?.[0])}
+                    className="block w-full rounded-xl border border-slate-200 bg-white p-3 text-sm"
+                  />
+
+                  <div className="mt-4 rounded-xl bg-slate-50 p-4 text-xs leading-5 text-slate-600">
+                    <p className="font-bold text-slate-800">
+                      Passport requirements
+                    </p>
+                    <ul className="mt-2 list-disc space-y-1 pl-4">
+                      <li>Use a clear passport-style image.</li>
+                      <li>Maximum file size: 2MB.</li>
+                      <li>Image formats are handled locally by the browser.</li>
+                    </ul>
+                  </div>
+
+                  <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 p-4 text-xs leading-5 text-blue-800">
+                    The current PWS registration API does not yet permanently
+                    store passport files. This screen provides a working local
+                    preview only until passport storage is added to the backend.
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                >
+                  Back
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setStep(4)}
+                  className="rounded-xl bg-green-700 px-6 py-3 text-sm font-bold text-white hover:bg-green-800"
+                >
+                  Continue to Payment
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 4 */}
+          {step === 4 && (
+            <div className="p-5 md:p-7">
+              <div className="mb-6">
+                <p className="text-xs font-bold uppercase tracking-wider text-green-700">
+                  Step 4
+                </p>
+                <h2 className="mt-1 text-xl font-black text-slate-900">
+                  Payment & Registration
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Record the registration fee and complete the PWS registration
+                  record.
+                </p>
+              </div>
+
+              <div className="grid gap-5 md:grid-cols-2">
+                <div>
+                  <label className={labelClass}>Registration Amount</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className={inputClass}
+                    value={form.amount}
+                    onChange={(e) => updateField('amount', e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Payment Reference</label>
+                  <input
+                    className={inputClass}
+                    value={form.paymentReference}
+                    onChange={(e) =>
+                      updateField('paymentReference', e.target.value)
+                    }
+                    placeholder="Receipt / transaction reference"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className={labelClass}>Registration Notes</label>
+                  <textarea
+                    rows={4}
+                    className={inputClass}
+                    value={form.notes}
+                    onChange={(e) => updateField('notes', e.target.value)}
+                    placeholder="Additional registration information..."
+                  />
+                </div>
+              </div>
+
+              <div className="mt-6 rounded-2xl bg-slate-50 p-5">
+                <h3 className="text-sm font-black text-slate-900">
+                  Registration Summary
+                </h3>
+
+                <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+                  <div>
+                    <span className="text-slate-500">Candidate</span>
+                    <p className="font-bold text-slate-900">
+                      {form.firstName} {form.lastName}
+                    </p>
+                  </div>
+
+                  <div>
+                    <span className="text-slate-500">Examination</span>
+                    <p className="font-bold text-slate-900">
+                      {examType} {form.examYear}
+                    </p>
+                  </div>
+
+                  <div>
+                    <span className="text-slate-500">Subjects</span>
+                    <p className="font-bold text-slate-900">
+                      {selectedSubjects.length} selected
+                    </p>
+                  </div>
+
+                  <div>
+                    <span className="text-slate-500">Passport</span>
+                    <p className="font-bold text-slate-900">
+                      {passportPreview ? 'Preview added' : 'Not added'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+                <button
+                  type="button"
+                  onClick={() => setStep(3)}
+                  className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                >
+                  Back
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="rounded-xl bg-green-700 px-7 py-3 text-sm font-black text-white shadow-sm hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {saving ? 'Registering...' : `Register ${examType} Candidate`}
+                </button>
+              </div>
+            </div>
+          )}
         </form>
 
-        <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
-          <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        {/* HISTORY */}
+        <section className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-100 md:p-7">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-green-700">
                 Records
               </p>
-
-              <h2 className="mt-1 text-lg font-bold text-slate-900">
-                {examType} Registration History
+              <h2 className="mt-1 text-xl font-black text-slate-900">
+                Registration History
               </h2>
-
-              <p className="text-sm text-slate-500">
-                Search and monitor {examType} registrations
-                created through PWS.
+              <p className="mt-1 text-sm text-slate-500">
+                Review candidates already recorded through the PWS {examType} workspace.
               </p>
             </div>
 
@@ -835,147 +982,107 @@ export default function ExamRegistration({
               <select
                 className={inputClass}
                 value={yearFilter}
-                onChange={(e) =>
-                  setYearFilter(e.target.value)
-                }
+                onChange={(e) => setYearFilter(e.target.value)}
               >
-                <option value="">
-                  All years
-                </option>
-                <option value="2026">
-                  2026
-                </option>
-                <option value="2027">
-                  2027
-                </option>
-                <option value="2028">
-                  2028
-                </option>
+                <option value="">All years</option>
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
               </select>
 
               <select
                 className={inputClass}
                 value={statusFilter}
-                onChange={(e) =>
-                  setStatusFilter(e.target.value)
-                }
+                onChange={(e) => setStatusFilter(e.target.value)}
               >
-                <option value="">
-                  All statuses
-                </option>
-                <option value="DRAFT">
-                  Draft
-                </option>
-                <option value="IN_PROGRESS">
-                  In Progress
-                </option>
-                <option value="SUBMITTED">
-                  Submitted
-                </option>
-                <option value="COMPLETED">
-                  Completed
-                </option>
-                <option value="CANCELLED">
-                  Cancelled
-                </option>
+                <option value="">All statuses</option>
+                <option value="DRAFT">Draft</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="SUBMITTED">Submitted</option>
+                <option value="COMPLETED">Completed</option>
+                <option value="CANCELLED">Cancelled</option>
               </select>
             </div>
           </div>
 
           {loading ? (
-            <div className="rounded-xl bg-slate-50 p-8 text-center text-sm text-slate-500">
+            <div className="rounded-2xl bg-slate-50 p-10 text-center text-sm text-slate-500">
               Loading {examType} registration records...
             </div>
           ) : registrations.length === 0 ? (
-            <div className="rounded-xl bg-slate-50 p-8 text-center text-sm text-slate-500">
+            <div className="rounded-2xl bg-slate-50 p-10 text-center text-sm text-slate-500">
               No {examType} registrations found.
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[1050px] text-left text-sm">
+              <table className="w-full min-w-[1100px] text-left text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
-                    <th className="px-3 py-3">
-                      Candidate ID
-                    </th>
-                    <th className="px-3 py-3">
-                      Candidate
-                    </th>
-                    <th className="px-3 py-3">
-                      Phone
-                    </th>
-                    <th className="px-3 py-3">
-                      Year
-                    </th>
-                    <th className="px-3 py-3">
-                      Centre
-                    </th>
-                    <th className="px-3 py-3">
-                      Branch
-                    </th>
-                    <th className="px-3 py-3">
-                      Status
-                    </th>
-                    <th className="px-3 py-3">
-                      Payment
-                    </th>
+                    <th className="px-3 py-3">Candidate ID</th>
+                    <th className="px-3 py-3">Candidate</th>
+                    <th className="px-3 py-3">Phone</th>
+                    <th className="px-3 py-3">Year</th>
+                    <th className="px-3 py-3">Centre</th>
+                    <th className="px-3 py-3">Branch</th>
+                    <th className="px-3 py-3">Status</th>
+                    <th className="px-3 py-3">Payment</th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {registrations.map(
-                    (registration) => (
-                      <tr
-                        key={registration.id}
-                        className="border-b border-slate-100"
-                      >
-                        <td className="px-3 py-4 font-semibold text-green-700">
-                          {registration.candidate_id}
-                        </td>
+                  {registrations.map((registration) => (
+                    <tr
+                      key={registration.id}
+                      className="border-b border-slate-100 hover:bg-slate-50"
+                    >
+                      <td className="px-3 py-4 font-black text-green-700">
+                        {registration.candidate_id}
+                      </td>
 
-                        <td className="px-3 py-4 font-medium text-slate-900">
-                          {registration.first_name}{' '}
-                          {registration.last_name}
-                        </td>
+                      <td className="px-3 py-4 font-bold text-slate-900">
+                        {registration.first_name} {registration.last_name}
+                      </td>
 
-                        <td className="px-3 py-4 text-slate-600">
-                          {registration.phone_number}
-                        </td>
+                      <td className="px-3 py-4 text-slate-600">
+                        {registration.phone_number}
+                      </td>
 
-                        <td className="px-3 py-4 text-slate-600">
-                          {registration.exam_year}
-                        </td>
+                      <td className="px-3 py-4 text-slate-600">
+                        {registration.exam_year}
+                      </td>
 
-                        <td className="px-3 py-4 text-slate-600">
-                          {registration.examination_centre ||
-                            '—'}
-                        </td>
+                      <td className="px-3 py-4 text-slate-600">
+                        {registration.examination_centre || '—'}
+                      </td>
 
-                        <td className="px-3 py-4 text-slate-600">
-                          {registration.branch_code ||
-                            registration.branch_name ||
-                            '—'}
-                        </td>
+                      <td className="px-3 py-4 text-slate-600">
+                        {registration.branch_code ||
+                          registration.branch_name ||
+                          '—'}
+                      </td>
 
-                        <td className="px-3 py-4">
-                          {statusBadge(
-                            registration.status,
-                          )}
-                        </td>
+                      <td className="px-3 py-4">
+                        {statusBadge(registration.status)}
+                      </td>
 
-                        <td className="px-3 py-4">
-                          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
-                            {registration.payment_status}
-                          </span>
-                        </td>
-                      </tr>
-                    ),
-                  )}
+                      <td className="px-3 py-4">
+                        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">
+                          {registration.payment_status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
           )}
         </section>
+
+        <div className="flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-xs leading-5 text-slate-300">
+          <FileText size={16} className="shrink-0" />
+          PWS registration records should be reviewed before any official
+          examination-board submission.
+        </div>
       </div>
     </div>
   )
