@@ -958,7 +958,7 @@ export default function ExamRegistration({
                 <button
                   type="button"
                   onClick={continueFromCandidate}
-                  className="rounded-xl bg-green-700 px-6 py-3 text-sm font-bold text-white hover:bg-green-800"
+                  className="exam-wizard-primary-button"
                 >
                   Continue to Examination
                 </button>
@@ -1034,7 +1034,7 @@ export default function ExamRegistration({
                 <button
                   type="button"
                   onClick={continueFromExamination}
-                  className="rounded-xl bg-green-700 px-6 py-3 text-sm font-bold text-white hover:bg-green-800"
+                  className="exam-wizard-primary-button"
                 >
                   Continue to Subjects
                 </button>
@@ -1116,7 +1116,7 @@ export default function ExamRegistration({
                 <button
                   type="button"
                   onClick={continueFromSubjects}
-                  className="rounded-xl bg-green-700 px-6 py-3 text-sm font-bold text-white hover:bg-green-800"
+                  className="exam-wizard-primary-button"
                 >
                   Continue to Passport
                 </button>
@@ -1198,7 +1198,7 @@ export default function ExamRegistration({
                 <button
                   type="button"
                   onClick={continueFromPassport}
-                  className="rounded-xl bg-green-700 px-6 py-3 text-sm font-bold text-white hover:bg-green-800"
+                  className="exam-wizard-primary-button"
                 >
                   Continue to Payment
                 </button>
@@ -1271,7 +1271,7 @@ export default function ExamRegistration({
                 <button
                   type="button"
                   onClick={continueFromPayment}
-                  className="rounded-xl bg-green-700 px-6 py-3 text-sm font-bold text-white hover:bg-green-800"
+                  className="exam-wizard-primary-button"
                 >
                   Continue to Confirmation
                 </button>
