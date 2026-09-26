@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#1457A6"/>
-  <path d="M112 118h288v72H184v58h190v68H184v78h-72z" fill="#fff"/>
-  <circle cx="386" cy="155" r="34" fill="#fff"/>
-  <text x="256" y="435" text-anchor="middle"
-        font-family="Arial,Helvetica,sans-serif"
-        font-size="58" font-weight="800" fill="#fff">PWSC</text>
-</svg>
