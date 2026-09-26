@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Capacitor } from '@capacitor/core'
 import {
   ArrowRight,
   BookOpen,
@@ -81,6 +82,22 @@ const features = [
     text: 'Bring everyday school administration into one secure platform.',
   },
 ]
+
+function AndroidRefreshButton() {
+  if (!Capacitor.isNativePlatform()) return null
+
+  return (
+    <button
+      type="button"
+      className="android-refresh-button"
+      onClick={() => window.location.reload()}
+      aria-label="Refresh Perfect Wisdom School"
+      title="Refresh"
+    >
+      ↻
+    </button>
+  )
+}
 
 function Logo({ light = false }: { light?: boolean }) {
   return (
@@ -2448,12 +2465,15 @@ export default function App() {
   }
 
   return (
-    <Dashboard
-      role={role}
-      onSignOut={() => {
-        clearAuthToken()
-        setPage('login')
-      }}
-    />
+    <>
+      <AndroidRefreshButton />
+      <Dashboard
+        role={role}
+        onSignOut={() => {
+          clearAuthToken()
+          setPage('login')
+        }}
+      />
+    </>
   )
 }
