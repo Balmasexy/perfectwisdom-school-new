@@ -3,6 +3,18 @@ apply plugin: 'com.android.application'
 android {
     namespace = "com.perfectwisdomschool.app"
     compileSdk = rootProject.ext.compileSdkVersion
+    signingConfigs {
+        release {
+            def keystorePath = System.getenv("PWSC_KEYSTORE_FILE")
+            if (keystorePath != null) {
+                storeFile file(keystorePath)
+                storePassword System.getenv("PWSC_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("PWSC_KEY_ALIAS")
+                keyPassword System.getenv("PWSC_KEY_PASSWORD")
+            }
+        }
+    }
+
     defaultConfig {
         applicationId "com.perfectwisdomschool.app"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -19,6 +31,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }

@@ -47,6 +47,19 @@ jobs:
         with:
           packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
 
+      - name: Prepare Android signing keystore
+        shell: bash
+        env:
+          PWSC_KEYSTORE_BASE64: ${{ secrets.PWSC_KEYSTORE_BASE64 }}
+          PWSC_KEYSTORE_PASSWORD: ${{ secrets.PWSC_KEYSTORE_PASSWORD }}
+          PWSC_KEY_ALIAS: ${{ secrets.PWSC_KEY_ALIAS }}
+          PWSC_KEY_PASSWORD: ${{ secrets.PWSC_KEY_PASSWORD }}
+        run: |
+          echo "$PWSC_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/pwsc-release.jks"
+          test -s "$RUNNER_TEMP/pwsc-release.jks"
+          echo "PWSC_KEYSTORE_FILE=$RUNNER_TEMP/pwsc-release.jks" >> "$GITHUB_ENV"
+          echo "PWSC_SIGNING_READY=true" >> "$GITHUB_ENV"
+
       - name: Build Debug APK
         working-directory: apps/web/android
         run: ./gradlew --no-daemon assembleDebug
@@ -58,6 +71,11 @@ jobs:
       - name: Build Release AAB
         working-directory: apps/web/android
         run: ./gradlew --no-daemon bundleRelease
+
+      - name: Remove signing keystore
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/pwsc-release.jks"
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
