@@ -15,6 +15,7 @@ import { classRoutes } from './routes/classes.js'
 import { admissionsRoutes } from './routes/admissions.js'
 import { reportRoutes } from './routes/reports.js'
 import { settingsRoutes } from './routes/settings.js'
+import { aiRoutes } from './routes/ai.js'
 import { ensureAccountIdSchema } from './db/account-id-migration.js'
 import { ensureJambRegistrationSchema } from './db/jamb-migration.js'
 import { ensureExamRegistrationSchema } from './db/exam-registration-migration.js'
@@ -60,6 +61,7 @@ await app.register(classRoutes)
 await app.register(admissionsRoutes)
 await app.register(reportRoutes)
 await app.register(settingsRoutes)
+await app.register(aiRoutes)
 
 app.get('/health', async () => {
   return {

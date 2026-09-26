@@ -27,6 +27,7 @@ import {
 } from 'lucide-react'
 import { browserSupportsWebAuthn, startAuthentication, startRegistration } from '@simplewebauthn/browser'
 import './App.css'
+import BalmzAI from './BalmzAI'
 import { apiRequest, clearAuthToken, setAuthToken } from './api'
 import Payments from './Payments'
 import Admissions from './Admissions'
@@ -114,22 +115,6 @@ function saveRole(role: Role) {
   localStorage.setItem(ROLE_STORAGE_KEY, role)
 }
 
-function BalmzAI({ compact = false }: { compact?: boolean }) {
-  return (
-    <div className={compact ? 'balmz-ai balmz-ai-compact' : 'balmz-ai'}>
-      <div className="balmz-ai-icon">
-        <Sparkles size={compact ? 17 : 20} />
-      </div>
-
-      <div>
-        <strong>BALMZ AI</strong>
-        {!compact && (
-          <span>Intelligent assistance for Perfect Wisdom School</span>
-        )}
-      </div>
-    </div>
-  )
-}
 
 function RoleSelector({
   role,
