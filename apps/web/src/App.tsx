@@ -249,6 +249,19 @@ function Landing({ onLogin }: { onLogin: () => void }) {
                 </a>
               </div>
 
+              <div className="hero-download">
+                <a
+                  className="download-app-button"
+                  href="https://github.com/Balmasexy/perfectwisdom-school-new/actions/runs/36226388939/artifacts/10901136931"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Download Android App
+                  <ArrowRight size={18} />
+                </a>
+                <span>Android app • Latest available build</span>
+              </div>
+
               <div className="hero-trust">
                 <div className="trust-icon"><ShieldCheck size={18} /></div>
                 <div>
@@ -1870,7 +1883,13 @@ function Dashboard({
 }) {
   const [open, setOpen] = useState(false)
   const [registrationOpen, setRegistrationOpen] = useState(false)
-  const [activeSection, setActiveSection] = useState('Dashboard')
+  const [activeSection, setActiveSection] = useState(() => {
+    try {
+      return localStorage.getItem('perfect-wisdom-school-active-section') || 'Dashboard'
+    } catch {
+      return 'Dashboard'
+    }
+  })
   const [registrationStudentId, setRegistrationStudentId] =
     useState<string | null>(null)
   const [summary, setSummary] = useState({
@@ -1929,6 +1948,14 @@ function Dashboard({
       cancelled = true
     }
   }, [])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('perfect-wisdom-school-active-section', activeSection)
+    } catch {
+      // Ignore storage errors.
+    }
+  }, [activeSection])
 
   const dashboardData = {
     Admin: {
@@ -2269,9 +2296,25 @@ function Dashboard({
             <Menu size={23} />
           </button>
 
-          <div>
-            <span>Perfect Wisdom School</span>
-            <strong>{role} Portal</strong>
+          <div className="dashboard-topbar-title">
+            <button
+              type="button"
+              className="dashboard-back-button"
+              onClick={() => {
+                if (activeSection !== 'Dashboard') {
+                  setActiveSection('Dashboard')
+                } else {
+                  onSignOut()
+                }
+              }}
+              aria-label={activeSection !== 'Dashboard' ? 'Back to dashboard' : 'Back to login'}
+            >
+              ← Back
+            </button>
+            <div>
+              <span>Perfect Wisdom School</span>
+              <strong>{role} Portal</strong>
+            </div>
           </div>
 
           <div className="dashboard-topbar-actions">
