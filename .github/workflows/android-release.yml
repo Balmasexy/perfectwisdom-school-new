@@ -24,7 +24,8 @@ jobs:
         with:
           version: 10
 
-      - name: Install dependencies
+      - name: Install web dependencies
+        working-directory: apps/web
         run: pnpm install --frozen-lockfile
 
       - name: Build web app
