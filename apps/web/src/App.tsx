@@ -108,8 +108,7 @@ function Logo({ light = false }: { light?: boolean }) {
         <span className="logo-sun">✦</span>
       </div>
       <div className="logo-text">
-        <strong>Perfect Wisdom</strong>
-        <span>School</span>
+        <strong>Perfect Wisdom School</strong>
       </div>
     </div>
   )
@@ -274,7 +273,12 @@ function Landing({ onLogin }: { onLogin: () => void }) {
             </div>
 
             <div className="hero-visual">
-              <div className="school-card">
+              <button
+                type="button"
+                className="school-card school-card-button"
+                onClick={onLogin}
+                aria-label="Open Perfect Wisdom School sign in"
+              >
                 <div className="school-card-top">
                   <Logo light />
                   <span className="live-pill">Platform</span>
@@ -304,7 +308,7 @@ function Landing({ onLogin }: { onLogin: () => void }) {
                 <div className="visual-footer">
                   <span><CheckCircle2 size={17} /> School operations made simpler</span>
                 </div>
-              </div>
+              </button>
             </div>
           </div>
         </section>
@@ -349,11 +353,20 @@ function Landing({ onLogin }: { onLogin: () => void }) {
               {features.map((feature) => {
                 const Icon = feature.icon
                 return (
-                  <div className="feature-card" key={feature.title}>
+                  <button
+                    type="button"
+                    className="feature-card"
+                    key={feature.title}
+                    onClick={onLogin}
+                    aria-label={`Sign in to access ${feature.title}`}
+                  >
                     <div className="feature-icon"><Icon size={23} /></div>
                     <h3>{feature.title}</h3>
                     <p>{feature.text}</p>
-                  </div>
+                    <span className="feature-card-link">
+                      Open workspace <ArrowRight size={15} />
+                    </span>
+                  </button>
                 )
               })}
             </div>
@@ -1966,6 +1979,33 @@ function Dashboard({
     }
   }, [activeSection])
 
+  const openDashboardSection = (section: string) => {
+    setActiveSection(section)
+    setOpen(false)
+  }
+
+  const statSection: Record<string, string> = {
+    'Total Students': 'Students',
+    'Active Staff': 'Staff',
+    'Branches': 'Branches',
+    'Attendance': 'Attendance',
+    'My Classes': 'Classes',
+    'Students': role === 'Parent' ? 'My Children' : 'Students',
+    'Tasks Today': 'Assignments',
+    'Children': 'My Children',
+    'Assignments': 'Assignments',
+    'School Updates': 'Messages',
+  }
+
+  const panelSection: Record<string, string> = {
+    'School Administration': 'Students',
+    'Recent Activity': 'Attendance',
+    'Today at School': 'Classes',
+    'Staff Activity': 'Attendance',
+    'My Children': 'My Children',
+    'School Updates': 'Messages',
+  }
+
   const dashboardData = {
     Admin: {
       kicker: 'ADMINISTRATION OVERVIEW',
@@ -2386,16 +2426,29 @@ function Dashboard({
 
               <div className="dashboard-stats">
                 {dashboardData.stats.map(([label, value]) => (
-                  <div key={label}>
+                  <button
+                    key={label}
+                    type="button"
+                    className="dashboard-stat-card"
+                    onClick={() => openDashboardSection(statSection[label] || 'Dashboard')}
+                    aria-label={`Open ${label}`}
+                  >
                     <span>{label}</span>
                     <strong>{value}</strong>
-                  </div>
+                    <small>Open</small>
+                  </button>
                 ))}
               </div>
 
               <div className="dashboard-panels">
                 {dashboardData.panels.map((panel) => (
-                  <div className="dashboard-panel" key={panel.title}>
+                  <button
+                    type="button"
+                    className="dashboard-panel dashboard-panel-button"
+                    key={panel.title}
+                    onClick={() => openDashboardSection(panelSection[panel.title] || 'Dashboard')}
+                    aria-label={`Open ${panel.title}`}
+                  >
                     <h2>{panel.title}</h2>
 
                     {panel.items.map(([label, value]) => (
@@ -2403,7 +2456,11 @@ function Dashboard({
                         {label} <strong>{value}</strong>
                       </p>
                     ))}
-                  </div>
+
+                    <span className="dashboard-card-link">
+                      Open workspace <ArrowRight size={14} />
+                    </span>
+                  </button>
                 ))}
               </div>
 
