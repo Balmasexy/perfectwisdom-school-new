@@ -1887,6 +1887,13 @@ function Dashboard({
   const [registrationOpen, setRegistrationOpen] = useState(false)
   const [activeSection, setActiveSection] = useState(() => {
     try {
+      const params = new URLSearchParams(window.location.search)
+      const paymentStatus = params.get('payment')
+
+      if (paymentStatus === 'success' || paymentStatus === 'failed') {
+        return 'Payments'
+      }
+
       return localStorage.getItem('perfect-wisdom-school-active-section') || 'Dashboard'
     } catch {
       return 'Dashboard'
