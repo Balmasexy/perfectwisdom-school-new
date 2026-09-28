@@ -410,6 +410,116 @@ export async function paymentRoutes(app: FastifyInstance) {
     },
   );
 
+
+  /*
+   * BANK TRANSFER PAYMENT
+   */
+  app.post(
+    '/payments/paystack/bank-transfer/initialize',
+    { preHandler: requireAuth },
+    async (request, reply) => {
+      const user = request.user as { id?: string; email?: string };
+
+      if (!user?.id) {
+        return reply.code(401).send({ message: 'Authentication required' });
+      }
+
+      const body = request.body as {
+        amount?: number;
+        description?: string;
+      };
+
+      const amount = Number(body?.amount);
+
+      if (!Number.isFinite(amount) || amount <= 0) {
+        return reply.code(400).send({
+          message: 'A valid payment amount is required',
+        });
+      }
+
+      if (!user.email) {
+        return reply.code(400).send({
+          message: 'A valid account email is required before payment',
+        });
+      }
+
+      const amountInKobo = Math.round(amount * 100);
+      const reference =
+        `PWSC-BT-${Date.now()}-` +
+        randomUUID().replace(/-/g, '').slice(0, 8);
+
+      const description =
+        body?.description?.trim() ||
+        'Bank transfer school payment';
+
+      await db.execute(sql`
+        INSERT INTO school_payments
+          (
+            user_id,
+            reference,
+            amount,
+            currency,
+            method,
+            status,
+            description
+          )
+        VALUES
+          (
+            ${user.id},
+            ${reference},
+            ${amount},
+            'NGN',
+            'BANK_TRANSFER',
+            'PENDING',
+            ${description}
+          )
+      `);
+
+      try {
+        const result = await paystackRequest(
+          '/transaction/initialize',
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              email: user.email,
+              amount: String(amountInKobo),
+              currency: 'NGN',
+              reference,
+              channels: ['bank_transfer'],
+              callback_url: PAYSTACK_CALLBACK_URL,
+              metadata: {
+                school: 'Perfect Wisdom School',
+                user_id: user.id,
+                payment_reference: reference,
+                payment_method: 'BANK_TRANSFER',
+                description,
+              },
+            }),
+          },
+        );
+
+        return reply.send({
+          authorization_url: result.data.authorization_url,
+          access_code: result.data.access_code,
+          reference: result.data.reference,
+        });
+      } catch (error) {
+        await db.execute(sql`
+          UPDATE school_payments
+          SET status = 'FAILED', updated_at = now()
+          WHERE reference = ${reference}
+        `);
+
+        return reply.code(502).send({
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Unable to initialize bank transfer payment',
+        });
+      }
+    },
+  );
+
   /*
    * PAYSTACK CALLBACK
    */

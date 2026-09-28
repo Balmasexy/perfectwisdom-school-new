@@ -78,7 +78,7 @@ export default function Payments() {
 
     if (paymentStatus === 'success') {
       setMessage(
-        'Debit/ATM card payment completed and the school account has been credited.',
+        'Payment completed and the school account has been credited.',
       );
     } else if (paymentStatus === 'failed') {
       setMessage(
@@ -132,6 +132,50 @@ export default function Payments() {
     }
   };
 
+
+  const payWithBankTransfer = async () => {
+    const numericAmount = Number(amount);
+
+    if (!numericAmount || numericAmount <= 0) {
+      setMessage('Enter a valid payment amount.');
+      return;
+    }
+
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const result = await apiRequest<{
+        authorization_url: string;
+        reference: string;
+      }>('/payments/paystack/bank-transfer/initialize', {
+        method: 'POST',
+        body: JSON.stringify({
+          amount: numericAmount,
+          description:
+            description.trim() ||
+            'Bank transfer school payment',
+        }),
+      });
+
+      if (!result.authorization_url) {
+        throw new Error(
+          'Paystack bank transfer authorization URL was not returned.',
+        );
+      }
+
+      window.location.assign(result.authorization_url);
+    } catch (error) {
+      console.error(error);
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : 'Unable to initialize bank transfer payment.',
+      );
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="page-shell payments-page">
       <div className="payments-hero">
@@ -141,8 +185,8 @@ export default function Payments() {
           </span>
           <h1>School Payments</h1>
           <p>
-            Pay securely with your Debit/ATM Card through
-            Paystack.
+            Pay securely with your Debit/ATM Card or Bank Transfer
+            through Paystack.
           </p>
         </div>
 
@@ -227,18 +271,33 @@ export default function Payments() {
           </label>
         </div>
 
-        <button
-          type="button"
-          onClick={payWithDebitCard}
-          disabled={loading}
-          className="payments-pay-button"
-        >
-          <CreditCard size={19} />
-          {loading
-            ? 'Connecting to Paystack...'
-            : 'Pay with Debit / ATM Card'}
-          {!loading && <ArrowRight size={18} />}
-        </button>
+        <div style={{ display: 'grid', gap: 10 }}>
+          <button
+            type="button"
+            onClick={payWithDebitCard}
+            disabled={loading}
+            className="payments-pay-button"
+          >
+            <CreditCard size={19} />
+            {loading
+              ? 'Connecting to Paystack...'
+              : 'Pay with Debit / ATM Card'}
+            {!loading && <ArrowRight size={18} />}
+          </button>
+
+          <button
+            type="button"
+            onClick={payWithBankTransfer}
+            disabled={loading}
+            className="payments-pay-button"
+          >
+            <Wallet size={19} />
+            {loading
+              ? 'Connecting to Paystack...'
+              : 'Pay with Bank Transfer'}
+            {!loading && <ArrowRight size={18} />}
+          </button>
+        </div>
 
         <div className="payments-security-note">
           <ShieldCheck size={18} />
@@ -297,7 +356,9 @@ export default function Payments() {
                     <td>
                       {payment.method === 'DEBIT_CARD'
                         ? 'Debit / ATM Card'
-                        : payment.method || 'Paystack'}
+                        : payment.method === 'BANK_TRANSFER'
+                          ? 'Bank Transfer'
+                          : payment.method || 'Paystack'}
                     </td>
                     <td>
                       {payment.description ||
