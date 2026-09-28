@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ArrowRight, CreditCard, History, ShieldCheck } from 'lucide-react';
 import { apiRequest } from './api';
 
 type PaymentConfig = {
@@ -29,6 +30,7 @@ export default function Payments() {
         apiRequest<PaymentConfig>('/payments/config'),
         apiRequest<Payment[]>('/payments/my'),
       ]);
+
       setConfig(cfg);
       setPayments(history || []);
     } catch (error) {
@@ -37,7 +39,7 @@ export default function Payments() {
   };
 
   useEffect(() => {
-    loadPayments();
+    void loadPayments();
 
     const params = new URLSearchParams(window.location.search);
     const paymentStatus = params.get('payment');
@@ -79,48 +81,73 @@ export default function Payments() {
       window.location.assign(result.authorization_url);
     } catch (error) {
       console.error(error);
+
       setMessage(
         error instanceof Error
           ? error.message
           : 'Unable to initialize Paystack payment.'
       );
+
       setLoading(false);
     }
   };
 
   return (
-    <div className="page-shell">
-      <div className="page-header">
-        <div>
-          <h1>Payments</h1>
-          <p>Make and track school payments securely with Paystack.</p>
+    <div className="page-shell payments-page">
+      <div className="payments-hero">
+        <div className="payments-hero-copy">
+          <span className="payments-kicker">PERFECT WISDOM SCHOOL</span>
+          <h1>School Payments</h1>
+          <p>
+            Make and track your school payments securely through Paystack.
+          </p>
+        </div>
+
+        <div className="payments-hero-icon">
+          <CreditCard size={28} />
         </div>
       </div>
 
       {message && (
-        <div className="card" style={{ marginBottom: 16 }}>
+        <div className="payments-message">
+          <ShieldCheck size={18} />
           <strong>{message}</strong>
         </div>
       )}
 
-      <div className="card">
-        <h2>Make a Payment</h2>
+      <section className="payments-card payments-form-card">
+        <div className="payments-card-heading">
+          <div className="payments-section-icon">
+            <CreditCard size={20} />
+          </div>
 
-        <div className="form-grid">
-          <label>
-            Amount ({config.currency})
-            <input
-              type="number"
-              min="1"
-              step="0.01"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="Enter amount"
-            />
+          <div>
+            <span>SECURE CHECKOUT</span>
+            <h2>Make a Payment</h2>
+          </div>
+        </div>
+
+        <div className="payments-form-grid">
+          <label className="payments-field">
+            <span>Amount ({config.currency})</span>
+
+            <div className="payments-input-wrap">
+              <span className="payments-input-prefix">₦</span>
+              <input
+                type="number"
+                min="1"
+                step="0.01"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="Enter amount"
+                inputMode="decimal"
+              />
+            </div>
           </label>
 
-          <label>
-            Description
+          <label className="payments-field">
+            <span>Description</span>
+
             <input
               type="text"
               value={description}
@@ -134,25 +161,44 @@ export default function Payments() {
           type="button"
           onClick={payWithPaystack}
           disabled={loading}
-          className="primary-button"
+          className="payments-pay-button"
         >
+          <CreditCard size={19} />
           {loading ? 'Connecting to Paystack...' : 'Pay with Paystack'}
+          {!loading && <ArrowRight size={18} />}
         </button>
 
-        <p style={{ marginTop: 12 }}>
-          You will be redirected to Paystack where you can complete payment
-          using the available payment methods, including bank transfer.
-        </p>
-      </div>
+        <div className="payments-security-note">
+          <ShieldCheck size={18} />
+          <p>
+            You will be redirected to Paystack's secure checkout to complete
+            your payment using the available payment methods, including bank
+            transfer.
+          </p>
+        </div>
+      </section>
 
-      <div className="card" style={{ marginTop: 20 }}>
-        <h2>Payment History</h2>
+      <section className="payments-card payments-history-card">
+        <div className="payments-card-heading">
+          <div className="payments-section-icon">
+            <History size={20} />
+          </div>
+
+          <div>
+            <span>TRANSACTION RECORDS</span>
+            <h2>Payment History</h2>
+          </div>
+        </div>
 
         {payments.length === 0 ? (
-          <p>No payments found.</p>
+          <div className="payments-empty">
+            <History size={30} />
+            <strong>No payments found</strong>
+            <span>Your completed school payments will appear here.</span>
+          </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table>
+          <div className="payments-table-wrap">
+            <table className="payments-table">
               <thead>
                 <tr>
                   <th>Date</th>
@@ -162,6 +208,7 @@ export default function Payments() {
                   <th>Status</th>
                 </tr>
               </thead>
+
               <tbody>
                 {payments.map((payment) => (
                   <tr key={payment.id}>
@@ -169,16 +216,23 @@ export default function Payments() {
                     <td>{payment.reference}</td>
                     <td>{payment.description || 'School payment'}</td>
                     <td>
-                      {payment.currency} {Number(payment.amount).toLocaleString()}
+                      {payment.currency}{' '}
+                      {Number(payment.amount).toLocaleString()}
                     </td>
-                    <td>{payment.status}</td>
+                    <td>
+                      <span
+                        className={`payment-status payment-status-${payment.status.toLowerCase()}`}
+                      >
+                        {payment.status}
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }

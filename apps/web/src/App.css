@@ -8908,3 +8908,387 @@ body {
     display: none;
   }
 }
+
+/* PERFECT WISDOM SCHOOL — PAYMENTS MOBILE/WEB UI */
+
+.payments-page {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+}
+
+.payments-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  padding: 26px;
+  margin-bottom: 18px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #062b5c, #1457a6);
+  color: #fff;
+  box-shadow: 0 14px 32px rgba(6,43,92,.14);
+}
+
+.payments-kicker {
+  display: block;
+  margin-bottom: 7px;
+  color: #ffbd75;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 1.7px;
+}
+
+.payments-hero h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(28px, 4vw, 38px);
+  font-weight: 950;
+  letter-spacing: -1.2px;
+}
+
+.payments-hero p {
+  margin: 8px 0 0;
+  color: rgba(255,255,255,.82);
+  line-height: 1.6;
+}
+
+.payments-hero-icon {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  color: #fff;
+  background: rgba(255,255,255,.13);
+  border: 1px solid rgba(255,255,255,.2);
+}
+
+.payments-message {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 18px;
+  padding: 13px 15px;
+  border-radius: 12px;
+  color: #17633b;
+  background: #edf9f2;
+  border: 1px solid #bce4cc;
+}
+
+.payments-card {
+  padding: 24px;
+  margin-bottom: 18px;
+  border: 1px solid #dce6f1;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 7px 22px rgba(16,42,67,.06);
+}
+
+.payments-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.payments-section-icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: #1457a6;
+  background: #eaf3ff;
+}
+
+.payments-card-heading span {
+  display: block;
+  color: #f28a24;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 1.4px;
+}
+
+.payments-card-heading h2 {
+  margin: 4px 0 0;
+  color: #10233f;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.payments-form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px;
+}
+
+.payments-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.payments-field > span {
+  color: #263c55;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.payments-field input {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 14px;
+  border: 1px solid #cfdbe8;
+  border-radius: 11px;
+  outline: none;
+  background: #fff !important;
+  color: #10233f !important;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+.payments-field input::placeholder {
+  color: #93a1b2;
+}
+
+.payments-field input:focus {
+  border-color: #1457a6;
+  box-shadow: 0 0 0 3px rgba(20,87,166,.09);
+}
+
+.payments-input-wrap {
+  position: relative;
+}
+
+.payments-input-wrap .payments-input-prefix {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  z-index: 2;
+  transform: translateY(-50%);
+  color: #1457a6;
+  font-size: 15px;
+  font-weight: 900;
+  pointer-events: none;
+}
+
+.payments-input-wrap input {
+  padding-left: 34px;
+}
+
+.payments-pay-button {
+  width: 100%;
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 22px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 12px;
+  color: #fff;
+  background: linear-gradient(135deg, #1457a6, #1c65b9);
+  font-size: 15px;
+  font-weight: 900;
+  box-shadow: 0 10px 24px rgba(20,87,166,.2);
+}
+
+.payments-pay-button:hover {
+  background: #062b5c;
+}
+
+.payments-pay-button:disabled {
+  opacity: .65;
+  cursor: wait;
+}
+
+.payments-security-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 15px;
+  padding: 13px 14px;
+  border-radius: 11px;
+  background: #f5f8fc;
+  border: 1px solid #e3ebf4;
+}
+
+.payments-security-note svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: #16804a;
+}
+
+.payments-security-note p {
+  margin: 0;
+  color: #65758b;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.payments-empty {
+  min-height: 170px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 7px;
+  border: 1px dashed #cbd8e6;
+  border-radius: 13px;
+  color: #7b8da2;
+  text-align: center;
+}
+
+.payments-empty svg {
+  color: #1457a6;
+}
+
+.payments-empty strong {
+  color: #263c55;
+  font-size: 14px;
+}
+
+.payments-empty span {
+  font-size: 12px;
+}
+
+.payments-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.payments-table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+}
+
+.payments-table th {
+  padding: 12px;
+  background: #f4f7fb;
+  color: #52667e;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.payments-table td {
+  padding: 13px 12px;
+  border-bottom: 1px solid #edf2f7;
+  color: #34485f;
+  font-size: 12px;
+}
+
+.payment-status {
+  display: inline-flex;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.payment-status-completed,
+.payment-status-success {
+  color: #17633b;
+  background: #eaf8ef;
+}
+
+.payment-status-pending {
+  color: #8a5b00;
+  background: #fff6dc;
+}
+
+.payment-status-failed {
+  color: #a12b23;
+  background: #fff0ee;
+}
+
+/* Stronger school name in the portal header */
+.dashboard-topbar-title > div {
+  min-width: 0;
+}
+
+.dashboard-topbar-title > div > span {
+  display: block;
+  color: #1457a6;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.dashboard-topbar-title > div > strong {
+  display: block;
+  margin-top: 4px;
+  color: #062b5c;
+  font-size: 19px;
+  font-weight: 950;
+  line-height: 1.15;
+}
+
+@media (max-width: 760px) {
+  .payments-page {
+    padding: 0 2px 30px;
+  }
+
+  .payments-hero {
+    align-items: flex-start;
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  .payments-hero h1 {
+    font-size: 27px;
+  }
+
+  .payments-hero p {
+    font-size: 13px;
+  }
+
+  .payments-hero-icon {
+    width: 48px;
+    height: 48px;
+    flex-basis: 48px;
+  }
+
+  .payments-card {
+    padding: 18px;
+    border-radius: 15px;
+  }
+
+  .payments-form-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .payments-field > span {
+    font-size: 13px;
+  }
+
+  .payments-field input {
+    min-height: 52px;
+    font-size: 16px;
+  }
+
+  .payments-pay-button {
+    min-height: 56px;
+    font-size: 15px;
+  }
+
+  .dashboard-topbar-title > div > span {
+    font-size: 10px;
+    letter-spacing: .7px;
+  }
+
+  .dashboard-topbar-title > div > strong {
+    font-size: 17px;
+  }
+}
