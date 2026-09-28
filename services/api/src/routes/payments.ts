@@ -300,11 +300,11 @@ export async function paymentRoutes(app: FastifyInstance) {
     { preHandler: requireAuth },
     async (request, reply) => {
       const user = request.user as {
-        id?: string;
+        sub?: string;
         email?: string;
       };
 
-      if (!user?.id) {
+      if (!user?.sub) {
         return reply.code(401).send({
           message: 'Authentication required',
         });
@@ -352,7 +352,7 @@ export async function paymentRoutes(app: FastifyInstance) {
           )
         VALUES
           (
-            ${user.id},
+            ${user.sub},
             ${reference},
             ${amount},
             'NGN',
@@ -376,7 +376,7 @@ export async function paymentRoutes(app: FastifyInstance) {
               callback_url: PAYSTACK_CALLBACK_URL,
               metadata: {
                 school: 'Perfect Wisdom School',
-                user_id: user.id,
+                user_id: user.sub,
                 payment_reference: reference,
                 payment_method: 'DEBIT_CARD',
                 description,
@@ -418,9 +418,9 @@ export async function paymentRoutes(app: FastifyInstance) {
     '/payments/paystack/bank-transfer/initialize',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const user = request.user as { id?: string; email?: string };
+      const user = request.user as { sub?: string; email?: string };
 
-      if (!user?.id) {
+      if (!user?.sub) {
         return reply.code(401).send({ message: 'Authentication required' });
       }
 
@@ -465,7 +465,7 @@ export async function paymentRoutes(app: FastifyInstance) {
           )
         VALUES
           (
-            ${user.id},
+            ${user.sub},
             ${reference},
             ${amount},
             'NGN',
@@ -489,7 +489,7 @@ export async function paymentRoutes(app: FastifyInstance) {
               callback_url: PAYSTACK_CALLBACK_URL,
               metadata: {
                 school: 'Perfect Wisdom School',
-                user_id: user.id,
+                user_id: user.sub,
                 payment_reference: reference,
                 payment_method: 'BANK_TRANSFER',
                 description,
@@ -670,9 +670,9 @@ export async function paymentRoutes(app: FastifyInstance) {
     '/payments/my',
     { preHandler: requireAuth },
     async (request, reply) => {
-      const user = request.user as { id?: string };
+      const user = request.user as { sub?: string };
 
-      if (!user?.id) {
+      if (!user?.sub) {
         return reply.code(401).send({
           message: 'Authentication required',
         });
@@ -689,7 +689,7 @@ export async function paymentRoutes(app: FastifyInstance) {
           description,
           created_at AS "createdAt"
         FROM school_payments
-        WHERE user_id = ${user.id}
+        WHERE user_id = ${user.sub}
         ORDER BY created_at DESC
       `);
 
