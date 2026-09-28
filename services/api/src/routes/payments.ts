@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { randomUUID } from 'crypto';
 import { db } from '../db/client.js';
 import { sql } from 'drizzle-orm';
-import { requireAuth } from './auth.js';
+import { requireAuth, requireRoles } from './auth.js';
 
 const API_PUBLIC_URL =
   process.env.API_PUBLIC_URL ||
@@ -24,7 +24,7 @@ async function ensurePaymentsTable() {
       id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
       user_id uuid NOT NULL,
       reference text NOT NULL UNIQUE,
-      amount numeric NOT NULL,
+      amount numeric(18,2) NOT NULL,
       currency text NOT NULL DEFAULT 'NGN',
       method text NOT NULL DEFAULT 'PAYSTACK',
       status text NOT NULL DEFAULT 'PENDING',
@@ -42,13 +42,53 @@ async function ensurePaymentsTable() {
   await db.execute(sql`
     ALTER TABLE school_payments
     ADD CONSTRAINT school_payments_method_check
-    CHECK (method IN ('PAYSTACK', 'OPAY_ONLINE', 'BANK_TRANSFER'))
+    CHECK (
+      method IN (
+        'PAYSTACK',
+        'DEBIT_CARD',
+        'OPAY_ONLINE',
+        'BANK_TRANSFER'
+      )
+    )
+  `);
+
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS school_account (
+      id smallint PRIMARY KEY DEFAULT 1,
+      account_name text NOT NULL DEFAULT 'Perfect Wisdom School Account',
+      balance numeric(18,2) NOT NULL DEFAULT 0,
+      currency text NOT NULL DEFAULT 'NGN',
+      updated_at timestamp NOT NULL DEFAULT now(),
+      CONSTRAINT school_account_singleton CHECK (id = 1)
+    )
+  `);
+
+  await db.execute(sql`
+    INSERT INTO school_account
+      (id, account_name, balance, currency)
+    VALUES
+      (1, 'Perfect Wisdom School Account', 0, 'NGN')
+    ON CONFLICT (id) DO NOTHING
+  `);
+
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS school_account_transactions (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      payment_reference text NOT NULL UNIQUE,
+      amount numeric(18,2) NOT NULL,
+      direction text NOT NULL DEFAULT 'CREDIT',
+      balance_after numeric(18,2) NOT NULL,
+      description text,
+      created_at timestamp NOT NULL DEFAULT now(),
+      CONSTRAINT school_account_transaction_direction_check
+        CHECK (direction IN ('CREDIT', 'DEBIT'))
+    )
   `);
 }
 
 async function paystackRequest(
   path: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ) {
   const secretKey = process.env.PAYSTACK_SECRET_KEY;
 
@@ -69,217 +109,481 @@ async function paystackRequest(
 
   if (!response.ok || !data?.status) {
     throw new Error(
-      data?.message || `Paystack request failed (${response.status})`
+      data?.message ||
+        `Paystack request failed (${response.status})`,
     );
   }
 
   return data;
 }
 
-export async function paymentRoutes(app: FastifyInstance) {
-  await ensurePaymentsTable();
+/*
+ * Verify the Paystack transaction and credit the school ledger.
+ *
+ * The transaction reference is unique and the ledger has a unique
+ * payment_reference, so the same payment cannot credit the balance twice.
+ */
+async function verifyAndCreditPayment(reference: string) {
+  const paymentResult = await db.execute(sql`
+    SELECT id, amount, status, description
+    FROM school_payments
+    WHERE reference = ${reference}
+    LIMIT 1
+  `);
 
-  app.get('/payments/config', async () => {
-    return {
-      currency: 'NGN',
-      provider: 'Paystack',
-    };
-  });
+  const payment = paymentResult.rows?.[0] as
+    | {
+        id: string;
+        amount: string | number;
+        status: string;
+        description: string | null;
+      }
+    | undefined;
 
-  app.post('/payments/paystack/initialize', { preHandler: requireAuth }, async (request, reply) => {
-    const user = request.user as {
-      id?: string;
-      email?: string;
-    };
+  if (!payment) {
+    throw new Error('Payment reference was not found');
+  }
 
-    if (!user?.id) {
-      return reply.code(401).send({ message: 'Authentication required' });
-    }
-
-    const body = request.body as {
-      amount?: number;
-      description?: string;
-    };
-
-    const amount = Number(body?.amount);
-
-    if (!Number.isFinite(amount) || amount <= 0) {
-      return reply.code(400).send({
-        message: 'A valid payment amount is required',
-      });
-    }
-
-    const email = user.email;
-
-    if (!email) {
-      return reply.code(400).send({
-        message: 'A valid account email is required before payment',
-      });
-    }
-
-    const amountInKobo = Math.round(amount * 100);
-    const reference = `PWSC-${Date.now()}-${randomUUID()
-      .replace(/-/g, '')
-      .slice(0, 8)}`;
-
-    const description =
-      body?.description?.trim() || 'School payment';
-
-    await db.execute(sql`
-      INSERT INTO school_payments
-        (user_id, reference, amount, currency, method, status, description)
-      VALUES
-        (${user.id},
-         ${reference},
-         ${amount},
-         'NGN',
-         'PAYSTACK',
-         'PENDING',
-         ${description})
+  if (payment.status === 'COMPLETED') {
+    const balanceResult = await db.execute(sql`
+      SELECT balance, currency
+      FROM school_account
+      WHERE id = 1
+      LIMIT 1
     `);
 
-    try {
-      const result = await paystackRequest('/transaction/initialize', {
-        method: 'POST',
-        body: JSON.stringify({
-          email,
-          amount: String(amountInKobo),
-          currency: 'NGN',
-          reference,
-          channels: ['bank_transfer'],
-          callback_url: PAYSTACK_CALLBACK_URL,
-          metadata: {
-            school: 'Perfect Wisdom School',
-            user_id: user.id,
-            payment_reference: reference,
-            description,
-          },
-        }),
-      });
+    const row = balanceResult.rows?.[0] as
+      | { balance: string | number; currency: string }
+      | undefined;
 
-      return reply.send({
-        authorization_url: result.data.authorization_url,
-        access_code: result.data.access_code,
-        reference: result.data.reference,
-      });
-    } catch (error) {
-      await db.execute(sql`
-        UPDATE school_payments
-        SET status = 'FAILED', updated_at = now()
-        WHERE reference = ${reference}
-      `);
-
-      return reply.code(502).send({
-        message:
-          error instanceof Error
-            ? error.message
-            : 'Unable to initialize Paystack payment',
-      });
-    }
-  });
-
-  app.get('/payments/paystack/callback', async (request, reply) => {
-    const query = request.query as {
-      reference?: string;
+    return {
+      verified: true,
+      alreadyCompleted: true,
+      balance: Number(row?.balance || 0),
+      currency: row?.currency || 'NGN',
     };
+  }
 
-    const reference = query.reference;
+  const result = await paystackRequest(
+    `/transaction/verify/${encodeURIComponent(reference)}`,
+  );
 
-    if (!reference) {
-      return reply.redirect(
-        `${SCHOOL_WEB_URL}/?payment=failed`
-      );
-    }
+  const transaction = result.data;
 
-    try {
-      const paymentResult = await db.execute(sql`
-        SELECT id, amount, status
-        FROM school_payments
-        WHERE reference = ${reference}
+  const expectedAmount = Math.round(
+    Number(payment.amount) * 100,
+  );
+
+  const verified =
+    transaction?.status === 'success' &&
+    transaction?.reference === reference &&
+    Number(transaction?.amount) === expectedAmount &&
+    transaction?.currency === 'NGN';
+
+  if (!verified) {
+    await db.execute(sql`
+      UPDATE school_payments
+      SET status = 'FAILED', updated_at = now()
+      WHERE id = ${payment.id}
+        AND status <> 'COMPLETED'
+    `);
+
+    return {
+      verified: false,
+      alreadyCompleted: false,
+      balance: null,
+      currency: 'NGN',
+    };
+  }
+
+  const creditedAmount = Number(payment.amount);
+
+  const credited = await db.transaction(async (tx) => {
+    const existing = await tx.execute(sql`
+      SELECT id
+      FROM school_account_transactions
+      WHERE payment_reference = ${reference}
+      LIMIT 1
+    `);
+
+    if ((existing.rows?.length || 0) > 0) {
+      const current = await tx.execute(sql`
+        SELECT balance, currency
+        FROM school_account
+        WHERE id = 1
         LIMIT 1
       `);
 
-      const payment = paymentResult.rows?.[0] as
-        | {
-            id: string;
-            amount: string | number;
-            status: string;
-          }
+      const row = current.rows?.[0] as
+        | { balance: string | number; currency: string }
         | undefined;
 
-      if (!payment) {
+      return {
+        balance: Number(row?.balance || 0),
+        currency: row?.currency || 'NGN',
+      };
+    }
+
+    const account = await tx.execute(sql`
+      UPDATE school_account
+      SET
+        balance = balance + ${creditedAmount},
+        updated_at = now()
+      WHERE id = 1
+      RETURNING balance, currency
+    `);
+
+    const row = account.rows?.[0] as
+      | { balance: string | number; currency: string }
+      | undefined;
+
+    if (!row) {
+      throw new Error('School account could not be updated');
+    }
+
+    await tx.execute(sql`
+      INSERT INTO school_account_transactions
+        (
+          payment_reference,
+          amount,
+          direction,
+          balance_after,
+          description
+        )
+      VALUES
+        (
+          ${reference},
+          ${creditedAmount},
+          'CREDIT',
+          ${Number(row.balance)},
+          ${payment.description || 'Debit/ATM card school payment'}
+        )
+    `);
+
+    await tx.execute(sql`
+      UPDATE school_payments
+      SET
+        status = 'COMPLETED',
+        updated_at = now()
+      WHERE id = ${payment.id}
+    `);
+
+    return {
+      balance: Number(row.balance),
+      currency: row.currency,
+    };
+  });
+
+  return {
+    verified: true,
+    alreadyCompleted: false,
+    balance: credited.balance,
+    currency: credited.currency,
+  };
+}
+
+export async function paymentRoutes(app: FastifyInstance) {
+  await ensurePaymentsTable();
+
+  app.get('/payments/config', async () => ({
+    currency: 'NGN',
+    provider: 'Paystack',
+    debitCard: true,
+    schoolBalanceLedger: true,
+  }));
+
+  /*
+   * DEBIT / ATM CARD PAYMENT
+   */
+  app.post(
+    '/payments/paystack/initialize',
+    { preHandler: requireAuth },
+    async (request, reply) => {
+      const user = request.user as {
+        id?: string;
+        email?: string;
+      };
+
+      if (!user?.id) {
+        return reply.code(401).send({
+          message: 'Authentication required',
+        });
+      }
+
+      const body = request.body as {
+        amount?: number;
+        description?: string;
+      };
+
+      const amount = Number(body?.amount);
+
+      if (!Number.isFinite(amount) || amount <= 0) {
+        return reply.code(400).send({
+          message: 'A valid payment amount is required',
+        });
+      }
+
+      if (!user.email) {
+        return reply.code(400).send({
+          message: 'A valid account email is required before payment',
+        });
+      }
+
+      const amountInKobo = Math.round(amount * 100);
+
+      const reference =
+        `PWSC-${Date.now()}-` +
+        randomUUID().replace(/-/g, '').slice(0, 8);
+
+      const description =
+        body?.description?.trim() ||
+        'Debit/ATM card school payment';
+
+      await db.execute(sql`
+        INSERT INTO school_payments
+          (
+            user_id,
+            reference,
+            amount,
+            currency,
+            method,
+            status,
+            description
+          )
+        VALUES
+          (
+            ${user.id},
+            ${reference},
+            ${amount},
+            'NGN',
+            'DEBIT_CARD',
+            'PENDING',
+            ${description}
+          )
+      `);
+
+      try {
+        const result = await paystackRequest(
+          '/transaction/initialize',
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              email: user.email,
+              amount: String(amountInKobo),
+              currency: 'NGN',
+              reference,
+              channels: ['card'],
+              callback_url: PAYSTACK_CALLBACK_URL,
+              metadata: {
+                school: 'Perfect Wisdom School',
+                user_id: user.id,
+                payment_reference: reference,
+                payment_method: 'DEBIT_CARD',
+                description,
+              },
+            }),
+          },
+        );
+
+        return reply.send({
+          authorization_url:
+            result.data.authorization_url,
+          access_code: result.data.access_code,
+          reference: result.data.reference,
+        });
+      } catch (error) {
+        await db.execute(sql`
+          UPDATE school_payments
+          SET
+            status = 'FAILED',
+            updated_at = now()
+          WHERE reference = ${reference}
+        `);
+
+        return reply.code(502).send({
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Unable to initialize debit card payment',
+        });
+      }
+    },
+  );
+
+  /*
+   * PAYSTACK CALLBACK
+   */
+  app.get(
+    '/payments/paystack/callback',
+    async (request, reply) => {
+      const query = request.query as {
+        reference?: string;
+      };
+
+      const reference = query.reference;
+
+      if (!reference) {
         return reply.redirect(
-          `${SCHOOL_WEB_URL}/?payment=failed&reference=${encodeURIComponent(
-            reference
-          )}`
+          `${SCHOOL_WEB_URL}/?payment=failed`,
         );
       }
 
-      const result = await paystackRequest(
-        `/transaction/verify/${encodeURIComponent(reference)}`
-      );
+      try {
+        const result =
+          await verifyAndCreditPayment(reference);
 
-      const transaction = result.data;
+        return reply.redirect(
+          `${SCHOOL_WEB_URL}/?payment=${
+            result.verified ? 'success' : 'failed'
+          }&reference=${encodeURIComponent(reference)}`,
+        );
+      } catch (error) {
+        console.error(
+          'Paystack callback verification failed:',
+          error,
+        );
 
-      const expectedAmount = Math.round(
-        Number(payment.amount) * 100
-      );
+        return reply.redirect(
+          `${SCHOOL_WEB_URL}/?payment=failed&reference=${
+            encodeURIComponent(reference)
+          }`,
+        );
+      }
+    },
+  );
 
-      const verified =
-        transaction?.status === 'success' &&
-        transaction?.reference === reference &&
-        Number(transaction?.amount) === expectedAmount &&
-        transaction?.currency === 'NGN';
+  /*
+   * MANUAL/AUTOMATIC VERIFICATION ENDPOINT
+   */
+  app.get(
+    '/payments/paystack/verify',
+    { preHandler: requireAuth },
+    async (request, reply) => {
+      const query = request.query as {
+        reference?: string;
+      };
 
-      await db.execute(sql`
-        UPDATE school_payments
-        SET
-          status = ${verified ? 'COMPLETED' : 'FAILED'},
-          updated_at = now()
-        WHERE id = ${payment.id}
+      if (!query.reference) {
+        return reply.code(400).send({
+          message: 'Payment reference is required',
+        });
+      }
+
+      try {
+        const result =
+          await verifyAndCreditPayment(query.reference);
+
+        return reply.send({
+          success: result.verified,
+          alreadyCompleted: result.alreadyCompleted,
+          balance: result.balance,
+          currency: result.currency,
+          reference: query.reference,
+        });
+      } catch (error) {
+        return reply.code(502).send({
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Unable to verify payment',
+        });
+      }
+    },
+  );
+
+  /*
+   * SCHOOL ACCOUNT BALANCE
+   */
+  app.get(
+    '/payments/school-balance',
+    { preHandler: requireRoles('ADMIN', 'STAFF') },
+    async (_request, reply) => {
+      const result = await db.execute(sql`
+        SELECT
+          account_name AS "accountName",
+          balance,
+          currency,
+          updated_at AS "updatedAt"
+        FROM school_account
+        WHERE id = 1
+        LIMIT 1
       `);
 
-      return reply.redirect(
-        `${SCHOOL_WEB_URL}/?payment=${
-          verified ? 'success' : 'failed'
-        }&reference=${encodeURIComponent(reference)}`
-      );
-    } catch (error) {
-      console.error('Paystack callback verification failed:', error);
+      const row = result.rows?.[0] as
+        | {
+            accountName: string;
+            balance: string | number;
+            currency: string;
+            updatedAt: string;
+          }
+        | undefined;
 
-      return reply.redirect(
-        `${SCHOOL_WEB_URL}/?payment=failed&reference=${encodeURIComponent(
-          reference
-        )}`
-      );
-    }
-  });
-
-  app.get('/payments/my', { preHandler: requireAuth }, async (request, reply) => {
-    const user = request.user as {
-      id?: string;
-    };
-
-    if (!user?.id) {
-      return reply.code(401).send({
-        message: 'Authentication required',
+      return reply.send({
+        accountName:
+          row?.accountName ||
+          'Perfect Wisdom School Account',
+        balance: Number(row?.balance || 0),
+        currency: row?.currency || 'NGN',
+        updatedAt: row?.updatedAt || null,
       });
-    }
+    },
+  );
 
-    const result = await db.execute(sql`
-      SELECT
-        id,
-        reference,
-        amount,
-        currency,
-        status,
-        description,
-        created_at AS "createdAt"
-      FROM school_payments
-      WHERE user_id = ${user.id}
-      ORDER BY created_at DESC
-    `);
+  /*
+   * SCHOOL ACCOUNT LEDGER
+   */
+  app.get(
+    '/payments/school-transactions',
+    { preHandler: requireRoles('ADMIN', 'STAFF') },
+    async (_request, reply) => {
+      const result = await db.execute(sql`
+        SELECT
+          payment_reference AS reference,
+          amount,
+          direction,
+          balance_after AS "balanceAfter",
+          description,
+          created_at AS "createdAt"
+        FROM school_account_transactions
+        ORDER BY created_at DESC
+        LIMIT 100
+      `);
 
-    return reply.send(result.rows);
-  });
+      return reply.send(result.rows);
+    },
+  );
+
+  /*
+   * USER PAYMENT HISTORY
+   */
+  app.get(
+    '/payments/my',
+    { preHandler: requireAuth },
+    async (request, reply) => {
+      const user = request.user as { id?: string };
+
+      if (!user?.id) {
+        return reply.code(401).send({
+          message: 'Authentication required',
+        });
+      }
+
+      const result = await db.execute(sql`
+        SELECT
+          id,
+          reference,
+          amount,
+          currency,
+          method,
+          status,
+          description,
+          created_at AS "createdAt"
+        FROM school_payments
+        WHERE user_id = ${user.id}
+        ORDER BY created_at DESC
+      `);
+
+      return reply.send(result.rows);
+    },
+  );
 }

@@ -9292,3 +9292,68 @@ body {
     font-size: 17px;
   }
 }
+
+
+/* Debit/ATM card + school account balance */
+.payments-balance-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding: 20px 22px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #0b7a4b, #159447);
+  color: #fff;
+  box-shadow: 0 10px 28px rgba(11, 122, 75, .18);
+}
+
+.payments-balance-icon {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(255,255,255,.16);
+}
+
+.payments-balance-card span {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .8px;
+  opacity: .9;
+}
+
+.payments-balance-card strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 27px;
+  line-height: 1.1;
+}
+
+.payments-balance-card small {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  opacity: .9;
+}
+
+.payments-security-note {
+  border-left: 4px solid #f28c18;
+}
+
+@media (max-width: 640px) {
+  .payments-balance-card {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .payments-balance-card strong {
+    font-size: 23px;
+  }
+
+  .payments-balance-card small {
+    line-height: 1.4;
+  }
+}
