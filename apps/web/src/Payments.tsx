@@ -1,340 +1,177 @@
-import { useEffect, useState } from 'react'
-import {
-  ArrowUpRight,
-  CheckCircle2,
-  Copy,
-  CreditCard,
-  ExternalLink,
-  Loader2,
-  RefreshCw,
-} from 'lucide-react'
-import { apiRequest } from './api'
+import { useEffect, useState } from 'react';
+import { apiRequest } from './api';
 
 type PaymentConfig = {
-  onlineUrl: string
-  bank: string
-  accountName: string
-  accountNumber: string
-  currency: string
-}
+  currency: string;
+};
 
 type Payment = {
-  id: string
-  amount: string | number
-  method: string
-  status: string
-  reference: string
-  description: string
-  created_at: string
-}
+  id: string;
+  reference: string;
+  amount: number;
+  currency: string;
+  status: string;
+  description?: string;
+  createdAt: string;
+};
 
 export default function Payments() {
-  const [config, setConfig] = useState<PaymentConfig | null>(null)
-  const [payments, setPayments] = useState<Payment[]>([])
-  const [amount, setAmount] = useState('')
-  const [description, setDescription] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
-  const [copied, setCopied] = useState(false)
+  const [config, setConfig] = useState<PaymentConfig>({ currency: 'NGN' });
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [amount, setAmount] = useState('');
+  const [description, setDescription] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
 
-  async function loadPayments() {
+  const loadPayments = async () => {
     try {
-      setError('')
-
-      const [paymentConfig, paymentHistory] = await Promise.all([
+      const [cfg, history] = await Promise.all([
         apiRequest<PaymentConfig>('/payments/config'),
         apiRequest<Payment[]>('/payments/my'),
-      ])
-
-      setConfig(paymentConfig)
-      setPayments(paymentHistory)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to load payments')
-    } finally {
-      setLoading(false)
+      ]);
+      setConfig(cfg);
+      setPayments(history || []);
+    } catch (error) {
+      console.error(error);
     }
-  }
+  };
 
   useEffect(() => {
-    void loadPayments()
-  }, [])
+    loadPayments();
 
-  async function submitTransfer(event: React.FormEvent) {
-    event.preventDefault()
+    const params = new URLSearchParams(window.location.search);
+    const paymentStatus = params.get('payment');
 
-    const numericAmount = Number(amount)
+    if (paymentStatus === 'success') {
+      setMessage('Payment completed successfully.');
+    } else if (paymentStatus === 'failed') {
+      setMessage('Payment was not completed. Please try again.');
+    }
+  }, []);
 
-    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
-      setError('Enter a valid payment amount greater than 0.')
-      return
+  const payWithPaystack = async () => {
+    const numericAmount = Number(amount);
+
+    if (!numericAmount || numericAmount <= 0) {
+      setMessage('Enter a valid payment amount.');
+      return;
     }
 
-    try {
-      setSubmitting(true)
-      setError('')
-      setSuccess('')
+    setLoading(true);
+    setMessage('');
 
+    try {
       const result = await apiRequest<{
-        payment: Payment
-        destination: PaymentConfig
-      }>('/payments/transfer', {
+        authorization_url: string;
+        reference: string;
+      }>('/payments/paystack/initialize', {
         method: 'POST',
         body: JSON.stringify({
           amount: numericAmount,
-          description:
-            description.trim() || 'School payment by bank transfer',
+          description: description.trim() || 'School payment',
         }),
-      })
+      });
 
-      setAmount('')
-      setDescription('')
+      if (!result.authorization_url) {
+        throw new Error('Paystack authorization URL was not returned.');
+      }
 
-      setSuccess(
-        `Payment reference ${result.payment.reference} created. Complete the transfer to the OPay account shown below. The payment will remain pending until it is verified.`,
-      )
-
-      await loadPayments()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to create payment')
-    } finally {
-      setSubmitting(false)
+      window.location.assign(result.authorization_url);
+    } catch (error) {
+      console.error(error);
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : 'Unable to initialize Paystack payment.'
+      );
+      setLoading(false);
     }
-  }
-
-  async function copyAccountNumber() {
-    if (!config) return
-
-    try {
-      await navigator.clipboard.writeText(config.accountNumber)
-      setCopied(true)
-
-      window.setTimeout(() => {
-        setCopied(false)
-      }, 1800)
-    } catch {
-      setError('Unable to copy the account number.')
-    }
-  }
-
-  function openOnlinePayment() {
-    if (!config?.onlineUrl) return
-    window.location.assign(config.onlineUrl)
-  }
-
-  function formatAmount(value: string | number) {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN',
-      minimumFractionDigits: 2,
-    }).format(Number(value))
-  }
-
-  function formatDate(value: string) {
-    return new Date(value).toLocaleString('en-NG', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    })
-  }
-
-  if (loading) {
-    return (
-      <section className="management-page">
-        <div className="management-card">
-          <div className="management-empty">
-            <Loader2 size={22} className="spin" />
-            Loading payment options...
-          </div>
-        </div>
-      </section>
-    )
-  }
+  };
 
   return (
-    <section className="management-page payments-page">
-      <div className="management-header">
+    <div className="page-shell">
+      <div className="page-header">
         <div>
-          <div className="dashboard-kicker">FINANCE</div>
           <h1>Payments</h1>
-          <p>
-            Make school payments online or record a bank transfer to the
-            school account.
-          </p>
+          <p>Make and track school payments securely with Paystack.</p>
+        </div>
+      </div>
+
+      {message && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <strong>{message}</strong>
+        </div>
+      )}
+
+      <div className="card">
+        <h2>Make a Payment</h2>
+
+        <div className="form-grid">
+          <label>
+            Amount ({config.currency})
+            <input
+              type="number"
+              min="1"
+              step="0.01"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Enter amount"
+            />
+          </label>
+
+          <label>
+            Description
+            <input
+              type="text"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="e.g. School fees"
+            />
+          </label>
         </div>
 
         <button
           type="button"
-          className="management-secondary-button"
-          onClick={() => void loadPayments()}
+          onClick={payWithPaystack}
+          disabled={loading}
+          className="primary-button"
         >
-          <RefreshCw size={16} />
-          Refresh
+          {loading ? 'Connecting to Paystack...' : 'Pay with Paystack'}
         </button>
+
+        <p style={{ marginTop: 12 }}>
+          You will be redirected to Paystack where you can complete payment
+          using the available payment methods, including bank transfer.
+        </p>
       </div>
 
-      {error && <div className="management-error">{error}</div>}
-
-      {success && (
-        <div className="payment-success">
-          <CheckCircle2 size={20} />
-          <span>{success}</span>
-        </div>
-      )}
-
-      <div className="payment-method-grid">
-        <article className="payment-method-card">
-          <div className="payment-method-icon">
-            <CreditCard size={24} />
-          </div>
-
-          <h2>Pay Online</h2>
-          <p>
-            Continue to OPay to make your payment online. Your payment is
-            completed directly through OPay.
-          </p>
-
-          <button
-            type="button"
-            className="management-primary-button"
-            onClick={openOnlinePayment}
-          >
-            Open OPay
-            <ExternalLink size={17} />
-          </button>
-        </article>
-
-        <article className="payment-method-card">
-          <div className="payment-method-icon">
-            <ArrowUpRight size={24} />
-          </div>
-
-          <h2>Bank Transfer</h2>
-          <p>
-            Transfer the amount to the school OPay account, then keep the
-            generated payment reference for verification.
-          </p>
-
-          {config && (
-            <div className="opay-account-box">
-              <div>
-                <span>Bank</span>
-                <strong>{config.bank}</strong>
-              </div>
-
-              <div>
-                <span>Account Name</span>
-                <strong>{config.accountName}</strong>
-              </div>
-
-              <div>
-                <span>Account Number</span>
-                <strong>{config.accountNumber}</strong>
-              </div>
-
-              <div>
-                <span>Currency</span>
-                <strong>{config.currency}</strong>
-              </div>
-
-              <button
-                type="button"
-                className="copy-account-button"
-                onClick={() => void copyAccountNumber()}
-              >
-                <Copy size={15} />
-                {copied ? 'Copied' : 'Copy Account Number'}
-              </button>
-            </div>
-          )}
-
-          <form className="payment-form" onSubmit={submitTransfer}>
-            <label>
-              Amount (NGN)
-              <input
-                type="number"
-                min="1"
-                step="0.01"
-                value={amount}
-                onChange={(event) => setAmount(event.target.value)}
-                placeholder="Enter amount"
-                required
-              />
-            </label>
-
-            <label>
-              Description
-              <input
-                type="text"
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                placeholder="e.g. School fees"
-                maxLength={200}
-              />
-            </label>
-
-            <button
-              type="submit"
-              className="management-primary-button"
-              disabled={submitting}
-            >
-              {submitting ? (
-                <>
-                  <Loader2 size={17} className="spin" />
-                  Creating reference...
-                </>
-              ) : (
-                <>
-                  Create Transfer Reference
-                  <ArrowUpRight size={17} />
-                </>
-              )}
-            </button>
-          </form>
-        </article>
-      </div>
-
-      <div className="management-card">
-        <div className="management-card-header">
-          <div>
-            <h2>Payment History</h2>
-            <p>Your recent school payment records.</p>
-          </div>
-        </div>
+      <div className="card" style={{ marginTop: 20 }}>
+        <h2>Payment History</h2>
 
         {payments.length === 0 ? (
-          <div className="management-empty">
-            No school payments have been recorded yet.
-          </div>
+          <p>No payments found.</p>
         ) : (
-          <div className="management-table-wrap">
-            <table className="management-table">
+          <div style={{ overflowX: 'auto' }}>
+            <table>
               <thead>
                 <tr>
                   <th>Date</th>
                   <th>Reference</th>
                   <th>Description</th>
-                  <th>Method</th>
                   <th>Amount</th>
                   <th>Status</th>
                 </tr>
               </thead>
-
               <tbody>
                 {payments.map((payment) => (
                   <tr key={payment.id}>
-                    <td>{formatDate(payment.created_at)}</td>
+                    <td>{new Date(payment.createdAt).toLocaleString()}</td>
                     <td>{payment.reference}</td>
-                    <td>{payment.description}</td>
-                    <td>{payment.method.replace('_', ' ')}</td>
-                    <td>{formatAmount(payment.amount)}</td>
+                    <td>{payment.description || 'School payment'}</td>
                     <td>
-                      <span
-                        className={`status-badge status-${payment.status.toLowerCase()}`}
-                      >
-                        {payment.status}
-                      </span>
+                      {payment.currency} {Number(payment.amount).toLocaleString()}
                     </td>
+                    <td>{payment.status}</td>
                   </tr>
                 ))}
               </tbody>
@@ -342,6 +179,6 @@ export default function Payments() {
           </div>
         )}
       </div>
-    </section>
-  )
+    </div>
+  );
 }
